@@ -1,6 +1,7 @@
 /**
  * Canvas翻页时钟 - 简洁版
  * 分秒翻页，毫秒快速变化
+ * 翻页动画完全可见
  */
 
 class FlipClock {
@@ -19,7 +20,6 @@ class FlipClock {
             fontFamily: 'Arial Rounded MT Bold, Arial, sans-serif',
             textColor: '#ffffff',
             animationDuration: 600,
-            isFast: false, // 毫秒快速变化模式
             ...options
         };
 
@@ -50,32 +50,66 @@ class FlipClock {
     }
 
     /**
-     * 绘制圆角矩形裁剪区域（上半部分或下半部分）
+     * 绘制矩形裁剪区域（整个卡片）
      */
-    drawHalfClip(isTop) {
+    drawCardClip() {
         const ctx = this.ctx;
         const w = this.options.width;
-        const h = this.options.height / 2;
-        const r = 80; // 圆角半径
+        const h = this.options.height;
+        const r = 50; // 圆角半径
+
+        ctx.beginPath();
+        ctx.moveTo(r, -h/2);
+        ctx.lineTo(w - r, -h/2);
+        ctx.quadraticCurveTo(w, -h/2, w, -h/2 + r);
+        ctx.lineTo(w, h/2 - r);
+        ctx.quadraticCurveTo(w, h/2, w - r, h/2);
+        ctx.lineTo(r, h/2);
+        ctx.quadraticCurveTo(0, h/2, 0, h/2 - r);
+        ctx.lineTo(0, -h/2 + r);
+        ctx.quadraticCurveTo(0, -h/2, r, -h/2);
+        ctx.closePath();
+        ctx.clip();
+    }
+
+    /**
+     * 绘制上半部分裁剪区域
+     */
+    drawTopClip() {
+        const ctx = this.ctx;
+        const w = this.options.width;
+        const h = this.options.height;
+        const r = 50;
+
+        ctx.beginPath();
+        ctx.moveTo(r, -h/2);
+        ctx.lineTo(w - r, -h/2);
+        ctx.quadraticCurveTo(w, -h/2, w, -h/2 + r);
+        ctx.lineTo(w, 0);
+        ctx.lineTo(0, 0);
+        ctx.lineTo(0, -h/2 + r);
+        ctx.quadraticCurveTo(0, -h/2, r, -h/2);
+        ctx.closePath();
+        ctx.clip();
+    }
+
+    /**
+     * 绘制下半部分裁剪区域
+     */
+    drawBottomClip() {
+        const ctx = this.ctx;
+        const w = this.options.width;
+        const h = this.options.height;
+        const r = 50;
 
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(w, 0);
-
-        if (isTop) {
-            // 上半部分
-            ctx.lineTo(w, h - r);
-            ctx.quadraticCurveTo(w, 0, w - r, 0);
-            ctx.lineTo(r, 0);
-            ctx.quadraticCurveTo(0, 0, 0, h - r);
-        } else {
-            // 下半部分
-            ctx.lineTo(w, r);
-            ctx.quadraticCurveTo(w, h, w - r, h);
-            ctx.lineTo(r, h);
-            ctx.quadraticCurveTo(0, h, 0, r);
-        }
-
+        ctx.lineTo(w, h/2 - r);
+        ctx.quadraticCurveTo(w, h/2, w - r, h/2);
+        ctx.lineTo(r, h/2);
+        ctx.quadraticCurveTo(0, h/2, 0, h/2 - r);
+        ctx.closePath();
         ctx.clip();
     }
 
@@ -85,9 +119,9 @@ class FlipClock {
     clearCanvas() {
         this.ctx.clearRect(
             -100,
-            -this.options.height / 2,
+            -this.options.height / 2 - 50,
             this.options.width + 200,
-            this.options.height
+            this.options.height + 100
         );
     }
 
@@ -114,23 +148,52 @@ class FlipClock {
     }
 
     /**
+     * 绘制卡片背景（带边框）
+     */
+    drawCardBackground() {
+        const w = this.options.width;
+        const h = this.options.height;
+        const r = 50;
+
+        // 绘制边框
+        this.ctx.strokeStyle = '#333333';
+        this.ctx.lineWidth = 3;
+        this.ctx.beginPath();
+        this.ctx.moveTo(r, -h/2);
+        this.ctx.lineTo(w - r, -h/2);
+        this.ctx.quadraticCurveTo(w, -h/2, w, -h/2 + r);
+        this.ctx.lineTo(w, h/2 - r);
+        this.ctx.quadraticCurveTo(w, h/2, w - r, h/2);
+        this.ctx.lineTo(r, h/2);
+        this.ctx.quadraticCurveTo(0, h/2, 0, h/2 - r);
+        this.ctx.lineTo(0, -h/2 + r);
+        this.ctx.quadraticCurveTo(0, -h/2, r, -h/2);
+        this.ctx.stroke();
+    }
+
+    /**
      * 渲染静态数字（无动画）
      */
     renderStatic(value) {
-        // 上半部分
-        this.ctx.save();
-        this.drawHalfClip(true);
         this.clearCanvas();
+
+        // 绘制边框
+        this.ctx.save();
+        this.drawCardClip();
+        this.drawCardBackground();
+        this.ctx.restore();
+
+        // 绘制上半部分文字
+        this.ctx.save();
+        this.drawTopClip();
         this.drawText(value);
         this.drawDivider();
         this.ctx.restore();
 
-        // 下半部分
+        // 绘制下半部分文字
         this.ctx.save();
-        this.drawHalfClip(false);
-        this.clearCanvas();
+        this.drawBottomClip();
         this.drawText(value);
-        this.drawDivider();
         this.ctx.restore();
 
         this.currentValue = value;
@@ -181,6 +244,8 @@ class FlipClock {
             return;
         }
 
+        this.clearCanvas();
+
         // 计算翻转角度（-90度 到 90度）
         const angle = this.easeInOut(elapsed, -90, 180, duration);
         const radians = angle * Math.PI / 180;
@@ -190,40 +255,55 @@ class FlipClock {
         if (elapsed < duration / 2) {
             // 后层（显示新数字）
             this.ctx.save();
-            this.drawHalfClip(true);
-            this.clearCanvas();
+            this.drawTopClip();
             this.drawText(this.nextValue);
             this.drawDivider();
             this.ctx.restore();
 
-            // 前层（显示旧数字，正在翻转）
+            // 前层（显示旧数字，正在翻转）- 完全可见
             this.ctx.save();
+            this.ctx.translate(0, 0); // 围绕中线翻转
             this.ctx.scale(1, scaleY);
-            this.drawHalfClip(true);
-            this.clearCanvas();
+            this.drawTopClip();
             this.drawText(this.currentValue);
             this.drawDivider();
+            this.ctx.restore();
+
+            // 下半部分（保持旧数字）
+            this.ctx.save();
+            this.drawBottomClip();
+            this.drawText(this.currentValue);
             this.ctx.restore();
         }
         // 第二阶段：下半部分翻转
         else {
-            // 后层（显示旧数字）
+            // 上半部分（显示新数字）
             this.ctx.save();
-            this.drawHalfClip(false);
-            this.clearCanvas();
-            this.drawText(this.currentValue);
-            this.drawDivider();
-            this.ctx.restore();
-
-            // 前层（显示新数字，正在翻转）
-            this.ctx.save();
-            this.ctx.scale(1, scaleY);
-            this.drawHalfClip(false);
-            this.clearCanvas();
+            this.drawTopClip();
             this.drawText(this.nextValue);
             this.drawDivider();
             this.ctx.restore();
+
+            // 后层（显示旧数字）
+            this.ctx.save();
+            this.drawBottomClip();
+            this.drawText(this.currentValue);
+            this.ctx.restore();
+
+            // 前层（显示新数字，正在翻转）- 完全可见
+            this.ctx.save();
+            this.ctx.translate(0, 0); // 围绕中线翻转
+            this.ctx.scale(1, scaleY);
+            this.drawBottomClip();
+            this.drawText(this.nextValue);
+            this.ctx.restore();
         }
+
+        // 绘制边框（始终在最上层）
+        this.ctx.save();
+        this.drawCardClip();
+        this.drawCardBackground();
+        this.ctx.restore();
 
         requestAnimationFrame(this.animateFlip.bind(this));
     }

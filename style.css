@@ -74,9 +74,10 @@ body {
     height: clamp(150px, 25vw, 300px);
 }
 
+/* 毫秒也使用相同大小 */
 .clock-unit.small {
-    width: clamp(100px, 18vw, 200px);
-    height: clamp(100px, 18vw, 200px);
+    width: clamp(150px, 25vw, 300px);
+    height: clamp(150px, 25vw, 300px);
 }
 
 .flip-canvas {
