@@ -1,0 +1,27 @@
+# Cloudflare Pages 构建输出
+.functions
+.wrangler
+
+# 依赖
+node_modules/
+package-lock.json
+yarn.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+npm-debug.log*
+
+# 临时文件
+*.tmp
+.temp/

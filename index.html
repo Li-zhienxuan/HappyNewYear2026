@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 新年倒计时 | Happy New Year 2026</title>
+    <meta name="description" content="2026新年倒计时 - 精确到毫秒的跨年计时器">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 背景粒子效果容器 -->
+    <div class="particles" id="particles"></div>
+
+    <!-- 主内容区域 -->
+    <div class="container">
+        <!-- 标题区域 -->
+        <header class="header">
+            <h1 class="title">
+                <span class="title-main">新年快乐</span>
+                <span class="title-sub">Happy New Year 2026</span>
+            </h1>
+            <p class="subtitle">距离2026年还有</p>
+        </header>
+
+        <!-- 倒计时主显示区 -->
+        <div class="countdown-container">
+            <div class="time-block">
+                <div class="time-display">
+                    <span class="time-value" id="days">000</span>
+                    <span class="time-label">天</span>
+                </div>
+            </div>
+
+            <div class="time-block">
+                <div class="time-display">
+                    <span class="time-value" id="hours">00</span>
+                    <span class="time-label">时</span>
+                </div>
+            </div>
+
+            <div class="time-block">
+                <div class="time-display">
+                    <span class="time-value" id="minutes">00</span>
+                    <span class="time-label">分</span>
+                </div>
+            </div>
+
+            <div class="time-block">
+                <div class="time-display">
+                    <span class="time-value" id="seconds">00</span>
+                    <span class="time-label">秒</span>
+                </div>
+            </div>
+
+            <div class="time-block milliseconds">
+                <div class="time-display">
+                    <span class="time-value" id="milliseconds">000</span>
+                    <span class="time-label">毫秒</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 进度条 -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <p class="progress-text" id="progressText">2025年已过去 0%</p>
+        </div>
+
+        <!-- 祝福语 -->
+        <div class="message" id="message">
+            <p class="message-text">愿2025年的温柔，延续到2026年</p>
+            <p class="message-text-sub">愿科技向善，人间值得</p>
+        </div>
+
+        <!-- 底部信息 -->
+        <footer class="footer">
+            <p class="footer-text">Made with ❤️ for a better tomorrow</p>
+            <p class="footer-time" id="currentTime"></p>
+        </footer>
+    </div>
+
+    <script src="countdown.js"></script>
+</body>
+</html>
