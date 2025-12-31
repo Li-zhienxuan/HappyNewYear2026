@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 新年倒计时预览 | Preview Celebration Effects</title>
+    <meta name="description" content="预览2026新年庆祝效果">
+    <meta name="robots" content="noindex, nofollow">
+    <!-- 强制禁用所有缓存 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // 强制刷新缓存的脚本
+        (function() {
+            const timestamp = new Date().getTime();
+            const style = document.querySelector('link[rel="stylesheet"]');
+            if (style) style.href = 'style.css?v=' + timestamp;
+        })();
+    </script>
+    <link rel="stylesheet" href="style.css">
+    <!-- Canvas翻页时钟库 -->
+    <script src="flip-clock-canvas.js?v=2026"></script>
+    <!-- 网易云音乐模块 -->
+    <script src="netease-music.js?v=2026"></script>
+    <script>
+        // 动态加载JS，带时间戳
+        window.addEventListener('DOMContentLoaded', function() {
+            const script = document.createElement('script');
+            const timestamp = new Date().getTime();
+            script.src = 'countdown.js?v=' + timestamp;
+            document.body.appendChild(script);
+        });
+    </script>
+    <style>
+        /* 预览页面特有样式 */
+        .preview-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 245, 255, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            max-width: 300px;
+            box-shadow: 0 8px 32px rgba(0, 245, 255, 0.3);
+        }
+
+        .preview-controls h2 {
+            margin: 0 0 15px 0;
+            font-size: 1.2rem;
+            color: var(--accent-cyan);
+            border-bottom: 1px solid rgba(0, 245, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .preview-controls p {
+            font-size: 0.85rem;
+            margin: 10px 0;
+            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .preview-button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.3), rgba(255, 107, 157, 0.3));
+            border: 1px solid rgba(0, 245, 255, 0.5);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .preview-button:hover {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.5), rgba(255, 107, 157, 0.5));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 245, 255, 0.4);
+        }
+
+        .preview-button:active {
+            transform: translateY(0);
+        }
+
+        .preview-button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .preview-info {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        @media (max-width: 768px) {
+            .preview-controls {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                padding: 15px;
+            }
+
+            .preview-button {
+                padding: 10px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景粒子效果容器 -->
+    <div class="particles" id="particles"></div>
+
+    <!-- 主内容区域 -->
+    <div class="container">
+        <!-- 标题区域 -->
+        <header class="header">
+            <h1 class="title">
+                <span class="title-main">预览模式</span>
+                <span class="title-sub">Preview Celebration Effects</span>
+            </h1>
+            <p class="subtitle">点击右上角按钮测试庆祝效果</p>
+        </header>
+
+        <!-- 当前时间显示 -->
+        <div class="current-time-section">
+            <div class="current-time-label">当前时间 Current Time</div>
+            <div class="current-time-display" id="currentTimeDisplay">--:--:--</div>
+        </div>
+
+        <!-- 倒计时主显示区 - Canvas翻页时钟 -->
+        <div class="countdown-container">
+            <!-- 小时 -->
+            <div class="canvas-clock-wrapper">
+                <canvas id="canvas-hours" class="flip-clock-canvas"></canvas>
+            </div>
+
+            <div class="flip-divider">:</div>
+
+            <!-- 分钟 -->
+            <div class="canvas-clock-wrapper">
+                <canvas id="canvas-minutes" class="flip-clock-canvas"></canvas>
+            </div>
+
+            <div class="flip-divider">:</div>
+
+            <!-- 秒 -->
+            <div class="canvas-clock-wrapper">
+                <canvas id="canvas-seconds" class="flip-clock-canvas"></canvas>
+            </div>
+
+            <div class="flip-divider">.</div>
+
+            <!-- 毫秒 -->
+            <div class="canvas-clock-wrapper small">
+                <canvas id="canvas-milliseconds" class="flip-clock-canvas"></canvas>
+            </div>
+        </div>
+
+        <!-- 进度条 -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <p class="progress-text" id="progressText">预览模式 Preview Mode</p>
+        </div>
+
+        <!-- 祝福语 -->
+        <div class="message" id="message">
+            <p class="message-text">预览模式 - 可提前查看跨年庆祝效果</p>
+            <p class="message-text-sub">点击右上角"触发跨年"按钮查看完整特效</p>
+        </div>
+
+        <!-- 底部信息 -->
+        <footer class="footer">
+            <p class="footer-text">Preview Page - Not for Production</p>
+        </footer>
+    </div>
+
+    <!-- 预览控制面板 -->
+    <div class="preview-controls">
+        <h2>🎆 预览控制</h2>
+        <p><span class="status-indicator"></span>预览模式已激活</p>
+
+        <button class="preview-button" onclick="triggerCelebration()">
+            🎉 触发跨年庆祝效果
+        </button>
+
+        <button class="preview-button secondary" onclick="resetPreview()">
+            🔄 重置预览
+        </button>
+
+        <button class="preview-button secondary" onclick="testMusic()">
+            🎵 测试音乐切换
+        </button>
+
+        <div class="preview-info">
+            <strong>功能说明：</strong><br>
+            • 触发跨年：模拟0点倒计时结束<br>
+            • 重置预览：恢复初始状态<br>
+            • 测试音乐：手动切换到跨年音乐<br><br>
+            <em>此页面不会被搜索引擎收录</em>
+        </div>
+    </div>
+
+    <!-- 庆祝效果模块（跨年特效） -->
+    <script src="celebration.js?v=2026"></script>
+
+    <script>
+        // 预览模式脚本
+        function triggerCelebration() {
+            console.log('🎆 手动触发跨年庆祝效果');
+
+            // 更新倒计时显示为00:00:00.000
+            if (window.canvasClocks && canvasClocks.hours) {
+                canvasClocks.hours.setValue(0);
+                canvasClocks.minutes.setValue(0);
+                canvasClocks.seconds.setValue(0);
+                canvasClocks.milliseconds.setValue(0);
+            }
+
+            const progress = document.getElementById('progress');
+            const progressText = document.getElementById('progressText');
+            const message = document.getElementById('message');
+
+            if (progress) progress.style.width = '100%';
+            if (progressText) progressText.textContent = '2025年已过去 100%';
+
+            // 隐藏祝福语
+            if (message) message.innerHTML = '';
+
+            // 切换到跨年音乐
+            if (typeof NetEaseMusic !== 'undefined') {
+                console.log('🎵 切换到跨年音乐');
+                NetEaseMusic.switchToCelebration();
+            }
+
+            // 启动庆祝效果
+            if (typeof Celebration !== 'undefined') {
+                console.log('🎆 触发2026新年庆祝效果');
+                Celebration.start();
+            } else {
+                console.error('❌ Celebration模块未加载');
+                alert('庆祝效果模块未加载，请检查celebration.js是否存在');
+            }
+        }
+
+        function resetPreview() {
+            console.log('🔄 重置预览');
+            location.reload();
+        }
+
+        function testMusic() {
+            console.log('🎵 测试音乐切换');
+
+            if (typeof NetEaseMusic !== 'undefined') {
+                NetEaseMusic.switchToCelebration();
+                alert('已切换到跨年音乐：China-E\n\n查看右下角音乐控制面板');
+            } else {
+                alert('网易云音乐模块未加载');
+            }
+        }
+
+        // 页面加载完成提示
+        window.addEventListener('load', () => {
+            console.log('✅ 预览页面加载完成');
+            console.log('📝 提示：点击右上角控制面板测试功能');
+        });
+    </script>
+
+    <noscript>
+        <div style="color: white; text-align: center; padding: 20px;">
+            请启用JavaScript以查看预览效果
+        </div>
+    </noscript>
+</body>
+</html>

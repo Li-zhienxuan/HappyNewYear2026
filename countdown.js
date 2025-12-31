@@ -170,6 +170,12 @@ function displayNewYear() {
     // 隐藏祝福语（准备显示庆祝效果）
     elements.message.innerHTML = '';
 
+    // 切换到跨年音乐
+    if (typeof NetEaseMusic !== 'undefined') {
+        console.log('🎵 切换到跨年音乐');
+        NetEaseMusic.switchToCelebration();
+    }
+
     // 启动庆祝效果
     if (typeof Celebration !== 'undefined') {
         console.log('🎆 触发2026新年庆祝效果');
@@ -302,6 +308,11 @@ function init() {
 
     // 创建背景粒子
     createParticles();
+
+    // 初始化网易云音乐
+    if (typeof NetEaseMusic !== 'undefined') {
+        NetEaseMusic.init();
+    }
 
     // 初始更新
     updateCountdown();
