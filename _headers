@@ -1,0 +1,19 @@
+# 禁用所有文件缓存
+/:root
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+
+# HTML文件
+*.html
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+
+# CSS文件
+*.css
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
+
+# JS文件
+*.js
+  Cache-Control: no-cache, no-store, must-revalidate, max-age=0
