@@ -1,13 +1,13 @@
 /**
- * Canvas翻页时钟实现
- * 参考 flipflow.neverup.cn 的 Canvas 实现方式
+ * Canvas翻页时钟 - 简洁版
+ * 分秒翻页，毫秒快速变化
  */
 
-class CanvasFlipClock {
+class FlipClock {
     constructor(canvasId, options = {}) {
         this.canvas = document.getElementById(canvasId);
         if (!this.canvas) {
-            console.error(`Canvas element #${canvasId} not found`);
+            console.error(`Canvas #${canvasId} not found`);
             return;
         }
 
@@ -15,15 +15,11 @@ class CanvasFlipClock {
         this.options = {
             width: 800,
             height: 800,
-            fontSize: 660,
-            fontFamily: 'Arial Black, Arial, sans-serif',
-            cornerRadius: 64,
-            bgColorTop: '#161616',
-            bgColorBottom: '#0c0c0c',
-            textColor: '#bcbcbc',
-            ampmColor: '#bbbbbb',
-            showBackground: true,
+            fontSize: 700,
+            fontFamily: 'Arial Rounded MT Bold, Arial, sans-serif',
+            textColor: '#ffffff',
             animationDuration: 600,
+            isFast: false, // 毫秒快速变化模式
             ...options
         };
 
@@ -36,7 +32,6 @@ class CanvasFlipClock {
     }
 
     initCanvas() {
-        // 设置Canvas尺寸（考虑DPI）
         const dpr = window.devicePixelRatio || 1;
         this.canvas.width = this.options.width * dpr;
         this.canvas.height = this.options.height * dpr;
@@ -45,11 +40,11 @@ class CanvasFlipClock {
 
         this.ctx.scale(dpr, dpr);
 
-        // 初始化坐标系：将原点移到左侧中心
+        // 坐标系：原点移到左侧中心
         this.ctx.translate(0, this.options.height / 2);
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
-        this.ctx.font = `normal bold ${this.options.fontSize}px ${this.options.fontFamily}`;
+        this.ctx.font = `bold ${this.options.fontSize}px ${this.options.fontFamily}`;
 
         this.renderStatic(this.currentValue);
     }
@@ -61,7 +56,7 @@ class CanvasFlipClock {
         const ctx = this.ctx;
         const w = this.options.width;
         const h = this.options.height / 2;
-        const r = this.options.cornerRadius;
+        const r = 80; // 圆角半径
 
         ctx.beginPath();
         ctx.moveTo(0, 0);
@@ -85,41 +80,10 @@ class CanvasFlipClock {
     }
 
     /**
-     * 创建渐变背景
-     */
-    createBackgroundGradient() {
-        const gradient = this.ctx.createLinearGradient(
-            0, -this.options.height / 2,
-            0, this.options.height / 2
-        );
-        gradient.addColorStop(0, this.options.bgColorTop);
-        gradient.addColorStop(1, this.options.bgColorBottom);
-        return gradient;
-    }
-
-    /**
      * 清除画布
      */
     clearCanvas() {
         this.ctx.clearRect(
-            -100,
-            -this.options.height / 2,
-            this.options.width + 200,
-            this.options.height
-        );
-    }
-
-    /**
-     * 绘制背景
-     */
-    drawBackground() {
-        if (!this.options.showBackground) {
-            this.clearCanvas();
-            return;
-        }
-
-        this.ctx.fillStyle = this.createBackgroundGradient();
-        this.ctx.fillRect(
             -100,
             -this.options.height / 2,
             this.options.width + 200,
@@ -139,8 +103,8 @@ class CanvasFlipClock {
      * 绘制分割线（中间的灰色线条）
      */
     drawDivider() {
-        const dividerHeight = 2;
-        this.ctx.fillStyle = '#000000';
+        const dividerHeight = 3;
+        this.ctx.fillStyle = '#444444';
         this.ctx.fillRect(
             0,
             -dividerHeight / 2,
@@ -153,16 +117,18 @@ class CanvasFlipClock {
      * 渲染静态数字（无动画）
      */
     renderStatic(value) {
+        // 上半部分
         this.ctx.save();
         this.drawHalfClip(true);
-        this.drawBackground();
+        this.clearCanvas();
         this.drawText(value);
         this.drawDivider();
         this.ctx.restore();
 
+        // 下半部分
         this.ctx.save();
         this.drawHalfClip(false);
-        this.drawBackground();
+        this.clearCanvas();
         this.drawText(value);
         this.drawDivider();
         this.ctx.restore();
@@ -171,7 +137,7 @@ class CanvasFlipClock {
     }
 
     /**
-     * 缓动函数：ease-in-out
+     * 缓动函数
      */
     easeInOut(time, start, change, duration) {
         time /= duration / 2;
@@ -206,7 +172,6 @@ class CanvasFlipClock {
         const duration = this.options.animationDuration;
 
         if (elapsed >= duration) {
-            // 动画结束
             this.isFlipping = false;
             this.renderStatic(this.nextValue);
 
@@ -226,7 +191,7 @@ class CanvasFlipClock {
             // 后层（显示新数字）
             this.ctx.save();
             this.drawHalfClip(true);
-            this.drawBackground();
+            this.clearCanvas();
             this.drawText(this.nextValue);
             this.drawDivider();
             this.ctx.restore();
@@ -235,7 +200,7 @@ class CanvasFlipClock {
             this.ctx.save();
             this.ctx.scale(1, scaleY);
             this.drawHalfClip(true);
-            this.drawBackground();
+            this.clearCanvas();
             this.drawText(this.currentValue);
             this.drawDivider();
             this.ctx.restore();
@@ -245,7 +210,7 @@ class CanvasFlipClock {
             // 后层（显示旧数字）
             this.ctx.save();
             this.drawHalfClip(false);
-            this.drawBackground();
+            this.clearCanvas();
             this.drawText(this.currentValue);
             this.drawDivider();
             this.ctx.restore();
@@ -254,7 +219,7 @@ class CanvasFlipClock {
             this.ctx.save();
             this.ctx.scale(1, scaleY);
             this.drawHalfClip(false);
-            this.drawBackground();
+            this.clearCanvas();
             this.drawText(this.nextValue);
             this.drawDivider();
             this.ctx.restore();
@@ -267,13 +232,12 @@ class CanvasFlipClock {
      * 更新值（带动画）
      */
     update(newValue) {
-        // 补零
         const paddedValue = newValue.toString().padStart(2, '0');
         this.flipTo(paddedValue);
     }
 
     /**
-     * 立即设置值（无动画）
+     * 立即设置值（无动画，用于毫秒快速变化）
      */
     setValue(newValue) {
         const paddedValue = newValue.toString().padStart(2, '0');
@@ -289,158 +253,5 @@ class CanvasFlipClock {
     }
 }
 
-/**
- * 倒计时控制器
- */
-class CountdownController {
-    constructor(options = {}) {
-        this.options = {
-            targetDate: new Date('2026-01-01T00:00:00'),
-            onTick: null,
-            onComplete: null,
-            ...options
-        };
-
-        this.hours = null;
-        this.minutes = null;
-        this.seconds = null;
-        this.milliseconds = null;
-        this.isRunning = false;
-        this.animationFrame = null;
-    }
-
-    /**
-     * 初始化时钟组件
-     */
-    initClocks() {
-        this.hours = new CanvasFlipClock('canvas-hours', {
-            fontSize: 660,
-            showBackground: true
-        });
-        this.minutes = new CanvasFlipClock('canvas-minutes', {
-            fontSize: 660,
-            showBackground: true
-        });
-        this.seconds = new CanvasFlipClock('canvas-seconds', {
-            fontSize: 660,
-            showBackground: true
-        });
-        this.milliseconds = new CanvasFlipClock('canvas-milliseconds', {
-            fontSize: 660,
-            showBackground: true
-        });
-    }
-
-    /**
-     * 计算剩余时间
-     */
-    calculateRemaining() {
-        const now = new Date().getTime();
-        const target = this.options.targetDate.getTime();
-        const diff = target - now;
-
-        if (diff <= 0) {
-            return {
-                total: 0,
-                hours: 0,
-                minutes: 0,
-                seconds: 0,
-                milliseconds: 0
-            };
-        }
-
-        return {
-            total: diff,
-            hours: Math.floor(diff / (1000 * 60 * 60)),
-            minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
-            seconds: Math.floor((diff % (1000 * 60)) / 1000),
-            milliseconds: diff % 1000
-        };
-    }
-
-    /**
-     * 更新显示
-     */
-    updateDisplay(time) {
-        if (this.hours) {
-            this.hours.update(time.hours);
-        }
-        if (this.minutes) {
-            this.minutes.update(time.minutes);
-        }
-        if (this.seconds) {
-            this.seconds.update(time.seconds);
-        }
-        if (this.milliseconds) {
-            // 毫秒不需要翻页动画，直接设置
-            this.milliseconds.setValue(
-                Math.floor(time.milliseconds / 10).toString().padStart(2, '0')
-            );
-        }
-
-        if (this.options.onTick) {
-            this.options.onTick(time);
-        }
-    }
-
-    /**
-     * 启动倒计时
-     */
-    start() {
-        if (this.isRunning) {
-            return;
-        }
-
-        this.isRunning = true;
-        this.initClocks();
-
-        const tick = () => {
-            if (!this.isRunning) {
-                return;
-            }
-
-            const time = this.calculateRemaining();
-
-            if (time.total <= 0) {
-                this.stop();
-                this.updateDisplay(time);
-
-                if (this.options.onComplete) {
-                    this.options.onComplete();
-                }
-                return;
-            }
-
-            this.updateDisplay(time);
-            this.animationFrame = requestAnimationFrame(tick);
-        };
-
-        tick();
-    }
-
-    /**
-     * 停止倒计时
-     */
-    stop() {
-        this.isRunning = false;
-        if (this.animationFrame) {
-            cancelAnimationFrame(this.animationFrame);
-            this.animationFrame = null;
-        }
-    }
-
-    /**
-     * 重置倒计时
-     */
-    reset() {
-        this.stop();
-        if (this.hours) this.hours.setValue('00');
-        if (this.minutes) this.minutes.setValue('00');
-        if (this.seconds) this.seconds.setValue('00');
-        if (this.milliseconds) this.milliseconds.setValue('00');
-    }
-}
-
 // 导出到全局
-window.CanvasFlipClock = CanvasFlipClock;
-window.CountdownController = CountdownController;
+window.FlipClock = FlipClock;

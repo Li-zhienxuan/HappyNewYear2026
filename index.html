@@ -9,7 +9,6 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <!-- 添加时间戳参数强制刷新 -->
     <script>
         // 强制刷新缓存的脚本
         (function() {
@@ -21,8 +20,6 @@
     <link rel="stylesheet" href="style.css">
     <!-- Canvas翻页时钟库 -->
     <script src="flip-clock-canvas.js?v=2026"></script>
-    <!-- 网易云音乐模块 -->
-    <script src="netease-music.js?v=2026"></script>
     <script>
         // 动态加载JS，带时间戳
         window.addEventListener('DOMContentLoaded', function() {
@@ -34,52 +31,35 @@
     </script>
 </head>
 <body>
-    <!-- 背景粒子效果容器 -->
-    <div class="particles" id="particles"></div>
-
     <!-- 主内容区域 -->
     <div class="container">
-        <!-- 标题区域 -->
-        <header class="header">
-            <h1 class="title">
-                <span class="title-main">新年快乐</span>
-                <span class="title-sub">Happy New Year 2026</span>
-            </h1>
-            <p class="subtitle">距离2026年还有</p>
-        </header>
+        <!-- 标题 -->
+        <h1 class="title">
+            <span class="title-main">新年快乐</span>
+            <span class="title-sub">Happy New Year 2026</span>
+        </h1>
 
-        <!-- 当前时间显示 -->
-        <div class="current-time-section">
-            <div class="current-time-label">当前时间 Current Time</div>
-            <div class="current-time-display" id="currentTimeDisplay">--:--:--</div>
-        </div>
+        <p class="subtitle">距离2026年还有</p>
 
-        <!-- 倒计时主显示区 - Canvas翻页时钟 -->
-        <div class="countdown-container">
-            <!-- 小时 -->
-            <div class="canvas-clock-wrapper">
-                <canvas id="canvas-hours" class="flip-clock-canvas"></canvas>
-            </div>
-
-            <div class="flip-divider">:</div>
-
+        <!-- 倒计时显示区 - Canvas翻页时钟 -->
+        <div class="countdown-wrapper">
             <!-- 分钟 -->
-            <div class="canvas-clock-wrapper">
-                <canvas id="canvas-minutes" class="flip-clock-canvas"></canvas>
+            <div class="clock-unit">
+                <canvas id="canvas-minutes" class="flip-canvas"></canvas>
             </div>
 
-            <div class="flip-divider">:</div>
+            <span class="divider">:</span>
 
             <!-- 秒 -->
-            <div class="canvas-clock-wrapper">
-                <canvas id="canvas-seconds" class="flip-clock-canvas"></canvas>
+            <div class="clock-unit">
+                <canvas id="canvas-seconds" class="flip-canvas"></canvas>
             </div>
 
-            <div class="flip-divider">.</div>
+            <span class="divider">:</span>
 
             <!-- 毫秒 -->
-            <div class="canvas-clock-wrapper small">
-                <canvas id="canvas-milliseconds" class="flip-clock-canvas"></canvas>
+            <div class="clock-unit small">
+                <canvas id="canvas-milliseconds" class="flip-canvas"></canvas>
             </div>
         </div>
 
@@ -88,29 +68,25 @@
             <div class="progress-bar">
                 <div class="progress-fill" id="progress"></div>
             </div>
-            <p class="progress-text" id="progressText">2025年已过去 0%</p>
+            <p class="progress-text" id="progressText">2025年已过去 99.994300%</p>
         </div>
 
         <!-- 祝福语 -->
         <div class="message" id="message">
-            <p class="message-text">愿2025年的温柔，延续到2026年</p>
-            <p class="message-text-sub">愿科技向善，人间值得</p>
+            <p>愿2025年的温柔，延续到2026年</p>
+            <p>愿科技向善，人间值得</p>
         </div>
 
-        <!-- 底部信息 -->
+        <!-- 页脚 -->
         <footer class="footer">
-            <p class="footer-text">Made with ❤️ for a better tomorrow</p>
+            <p>by ZhienXuan</p>
         </footer>
     </div>
 
-    <!-- 移除静态script标签，改为动态加载 -->
     <noscript>
         <div style="color: white; text-align: center; padding: 20px;">
             请启用JavaScript以查看倒计时
         </div>
     </noscript>
-
-    <!-- 庆祝效果模块（跨年特效） -->
-    <script src="celebration.js?v=2026"></script>
 </body>
 </html>
