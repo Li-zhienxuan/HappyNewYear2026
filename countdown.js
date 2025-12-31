@@ -159,6 +159,13 @@ function init() {
         return;
     }
 
+    // 启动烟花效果
+    if (typeof Fireworks !== 'undefined') {
+        const fireworks = new Fireworks();
+        fireworks.start();
+        console.log('🎆 烟花效果已启动');
+    }
+
     // 初始更新
     updateCountdown();
 
