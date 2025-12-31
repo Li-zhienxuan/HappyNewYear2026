@@ -190,31 +190,56 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: clamp(0.8rem, 2vw, 2rem);
+    gap: 0.8rem;
     flex-wrap: wrap;
     margin-bottom: 3rem;
 }
 
-.time-block {
+/* ===== 翻页卡片样式 ===== */
+.flip-card {
     position: relative;
+    width: clamp(80px, 10vw, 120px);
+    height: clamp(100px, 12vw, 140px);
+    perspective: 1000px;
 }
 
-.time-display {
+.flip-card.small {
+    width: clamp(100px, 12vw, 160px);
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.flip-card.flipping .flip-card-inner {
+    transform: rotateX(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
-    border: 2px solid rgba(0, 217, 255, 0.3);
-    border-radius: 20px;
-    padding: clamp(1.5rem, 4vw, 3rem);
-    min-width: clamp(100px, 15vw, 160px);
+    border: 2px solid rgba(0, 245, 255, 0.4);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     box-shadow:
-        0 8px 32px rgba(0, 217, 255, 0.1),
-        inset 0 0 20px rgba(0, 217, 255, 0.05);
-    transition: all 0.3s ease;
-    position: relative;
+        0 8px 32px rgba(0, 245, 255, 0.2),
+        inset 0 0 30px rgba(0, 245, 255, 0.05);
     overflow: hidden;
 }
 
-.time-display::before {
+.flip-card-front::before,
+.flip-card-back::before {
     content: '';
     position: absolute;
     top: -50%;
@@ -223,63 +248,43 @@ body {
     height: 200%;
     background: linear-gradient(45deg,
         transparent,
-        rgba(0, 217, 255, 0.1),
+        rgba(0, 245, 255, 0.15),
         transparent);
     transform: rotate(45deg);
     animation: shimmer 3s infinite;
 }
 
-@keyframes shimmer {
-    0% {
-        transform: translateX(-100%) rotate(45deg);
-    }
-    100% {
-        transform: translateX(100%) rotate(45deg);
-    }
+.flip-card-back {
+    transform: rotateX(180deg);
 }
 
-.time-display:hover {
-    transform: translateY(-5px) scale(1.05);
-    border-color: var(--accent-cyan);
-    box-shadow:
-        0 12px 40px rgba(0, 217, 255, 0.3),
-        inset 0 0 30px rgba(0, 217, 255, 0.1);
-}
-
-.time-value {
-    display: block;
-    font-size: clamp(2.5rem, 7vw, 5rem);
+.flip-value {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
     font-weight: 700;
     color: var(--accent-cyan);
     font-family: 'Courier New', monospace;
     text-shadow:
         0 0 10px var(--accent-cyan),
         0 0 20px var(--accent-cyan),
-        0 0 30px var(--accent-cyan);
+        0 0 30px rgba(0, 245, 255, 0.5);
     letter-spacing: 0.05em;
     line-height: 1;
+    z-index: 1;
 }
 
-.milliseconds .time-value {
-    font-size: clamp(1.5rem, 4vw, 2.5rem);
-    color: var(--accent-glow);
-    text-shadow:
-        0 0 10px var(--accent-glow),
-        0 0 20px var(--accent-glow);
+.flip-card.small .flip-value {
+    font-size: clamp(1.8rem, 4vw, 3rem);
 }
 
-.time-label {
-    display: block;
-    font-size: clamp(0.8rem, 2vw, 1rem);
-    color: var(--text-secondary);
-    margin-top: 0.8rem;
-    letter-spacing: 0.2em;
-    font-weight: 300;
+.flip-divider {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 700;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 20px var(--accent-cyan);
+    margin: 0 0.3rem;
+    animation: pulse 2s ease-in-out infinite;
 }
 
-/* ===== 进度条 ===== */
-.progress-container {
-    max-width: 800px;
     margin: 0 auto 3rem;
 }
 
@@ -389,12 +394,16 @@ body {
 /* ===== 响应式设计 ===== */
 @media (max-width: 768px) {
     .countdown-container {
-        gap: 0.6rem;
+        gap: 0.4rem;
     }
 
-    .time-display {
-        padding: 1.2rem 1rem;
-        min-width: 70px;
+    .flip-card {
+        width: clamp(60px, 9vw, 90px);
+        height: clamp(80px, 11vw, 110px);
+    }
+
+    .flip-card.small {
+        width: clamp(80px, 11vw, 120px);
     }
 
     .container {
@@ -412,26 +421,30 @@ body {
 
 @media (max-width: 480px) {
     .countdown-container {
-        gap: 0.5rem;
+        gap: 0.3rem;
+        flex-wrap: nowrap;
     }
 
-    .time-display {
-        padding: 1rem 0.8rem;
-        min-width: 60px;
-        border-radius: 15px;
+    .flip-card {
+        width: clamp(50px, 8vw, 70px);
+        height: clamp(70px, 10vw, 90px);
     }
 
-    .time-value {
-        font-size: clamp(1.8rem, 8vw, 3rem);
+    .flip-card.small {
+        width: clamp(60px, 10vw, 90px);
     }
 
-    .milliseconds .time-value {
-        font-size: clamp(1rem, 4vw, 1.5rem);
+    .flip-value {
+        font-size: clamp(1.5rem, 5vw, 2.5rem);
     }
 
-    .time-label {
-        font-size: 0.65rem;
-        margin-top: 0.5rem;
+    .flip-card.small .flip-value {
+        font-size: clamp(1rem, 3.5vw, 1.8rem);
+    }
+
+    .flip-divider {
+        font-size: clamp(1.5rem, 5vw, 2.5rem);
+        margin: 0 0.2rem;
     }
 
     .container {
@@ -440,21 +453,6 @@ body {
 
     .header {
         margin-bottom: 1.5rem;
-    }
-
-    /* 手机端使用网格布局，更紧凑 */
-    .countdown-container {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
-        width: 100%;
-        max-width: 400px;
-        margin: 0 auto 2rem;
-    }
-
-    .time-block:nth-child(4),
-    .time-block:nth-child(5) {
-        grid-column: span 1;
     }
 }
 

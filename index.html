@@ -34,38 +34,53 @@
 
         <!-- 倒计时主显示区 -->
         <div class="countdown-container">
-            <div class="time-block">
-                <div class="time-display">
-                    <span class="time-value" id="days">000</span>
-                    <span class="time-label">天</span>
+            <div class="flip-card" id="hours">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <span class="flip-value">00</span>
+                    </div>
+                    <div class="flip-card-back">
+                        <span class="flip-value">00</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="time-block">
-                <div class="time-display">
-                    <span class="time-value" id="hours">00</span>
-                    <span class="time-label">时</span>
+            <div class="flip-divider">:</div>
+
+            <div class="flip-card" id="minutes">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <span class="flip-value">00</span>
+                    </div>
+                    <div class="flip-card-back">
+                        <span class="flip-value">00</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="time-block">
-                <div class="time-display">
-                    <span class="time-value" id="minutes">00</span>
-                    <span class="time-label">分</span>
+            <div class="flip-divider">:</div>
+
+            <div class="flip-card" id="seconds">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <span class="flip-value">00</span>
+                    </div>
+                    <div class="flip-card-back">
+                        <span class="flip-value">00</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="time-block">
-                <div class="time-display">
-                    <span class="time-value" id="seconds">00</span>
-                    <span class="time-label">秒</span>
-                </div>
-            </div>
+            <div class="flip-divider">.</div>
 
-            <div class="time-block milliseconds">
-                <div class="time-display">
-                    <span class="time-value" id="milliseconds">000</span>
-                    <span class="time-label">毫秒</span>
+            <div class="flip-card small" id="milliseconds">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <span class="flip-value">000</span>
+                    </div>
+                    <div class="flip-card-back">
+                        <span class="flip-value">000</span>
+                    </div>
                 </div>
             </div>
         </div>

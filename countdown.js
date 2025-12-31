@@ -1,13 +1,20 @@
 // ===== 2026新年倒计时 =====
-// 精确到毫秒的实时倒计时
+// 精确到毫秒的实时倒计时，翻页效果
 
 // 目标时间：2026年1月1日 00:00:00
 const TARGET_DATE = new Date('2026-01-01T00:00:00').getTime();
 const START_DATE = new Date('2025-01-01T00:00:00').getTime(); // 2025年开始
 
+// 存储上一个值的对象
+let previousValues = {
+    hours: null,
+    minutes: null,
+    seconds: null,
+    milliseconds: null
+};
+
 // DOM 元素
 const elements = {
-    days: document.getElementById('days'),
     hours: document.getElementById('hours'),
     minutes: document.getElementById('minutes'),
     seconds: document.getElementById('seconds'),
@@ -21,6 +28,35 @@ const elements = {
 // 格式化数字，确保两位/三位数
 function padNumber(num, digits = 2) {
     return num.toString().padStart(digits, '0');
+}
+
+// 更新翻页卡片的值
+function updateFlipCard(element, value, type) {
+    const paddedValue = padNumber(value, type === 'milliseconds' ? 3 : 2);
+    const frontValue = element.querySelector('.flip-card-front .flip-value');
+    const backValue = element.querySelector('.flip-card-back .flip-value');
+
+    // 检查值是否改变
+    if (previousValues[type] !== null && previousValues[type] !== paddedValue) {
+        // 设置背面的新值
+        backValue.textContent = paddedValue;
+
+        // 添加翻页动画类
+        element.classList.add('flipping');
+
+        // 动画完成后更新正面值并移除动画类
+        setTimeout(() => {
+            frontValue.textContent = paddedValue;
+            element.classList.remove('flipping');
+        }, 500); // 与CSS transition时间一致
+    } else if (previousValues[type] === null) {
+        // 初始化时直接设置
+        frontValue.textContent = paddedValue;
+        backValue.textContent = paddedValue;
+    }
+
+    // 更新存储的值
+    previousValues[type] = paddedValue;
 }
 
 // 更新倒计时显示
@@ -41,12 +77,11 @@ function updateCountdown() {
     const seconds = Math.floor((difference % (1000 * 60)) / 1000);
     const milliseconds = difference % 1000;
 
-    // 更新显示
-    elements.days.textContent = padNumber(days, 3);
-    elements.hours.textContent = padNumber(hours);
-    elements.minutes.textContent = padNumber(minutes);
-    elements.seconds.textContent = padNumber(seconds);
-    elements.milliseconds.textContent = padNumber(milliseconds, 3);
+    // 使用翻页效果更新显示
+    updateFlipCard(elements.hours, hours, 'hours');
+    updateFlipCard(elements.minutes, minutes, 'minutes');
+    updateFlipCard(elements.seconds, seconds, 'seconds');
+    updateFlipCard(elements.milliseconds, milliseconds, 'milliseconds');
 
     // 更新进度条（2025年已过百分比）
     updateProgress(now);
@@ -80,11 +115,11 @@ function updateCurrentTime() {
 function displayNewYear() {
     document.body.classList.add('new-year-arrived');
 
-    elements.days.textContent = '000';
-    elements.hours.textContent = '00';
-    elements.minutes.textContent = '00';
-    elements.seconds.textContent = '00';
-    elements.milliseconds.textContent = '000';
+    // 更新所有翻页卡片为00
+    updateFlipCard(elements.hours, 0, 'hours');
+    updateFlipCard(elements.minutes, 0, 'minutes');
+    updateFlipCard(elements.seconds, 0, 'seconds');
+    updateFlipCard(elements.milliseconds, 0, 'milliseconds');
 
     elements.progress.style.width = '100%';
     elements.progressText.textContent = '2025年已过去 100%';
