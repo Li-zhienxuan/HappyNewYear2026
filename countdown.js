@@ -148,6 +148,7 @@ function updateCurrentTime() {
 function displayNewYear() {
     document.body.classList.add('new-year-arrived');
 
+    // 更新倒计时显示
     updateFlipUnit(elements.hours, 0, 'hours');
     updateFlipUnit(elements.minutes, 0, 'minutes');
     updateFlipUnit(elements.seconds, 0, 'seconds');
@@ -156,12 +157,22 @@ function displayNewYear() {
     elements.progress.style.width = '100%';
     elements.progressText.textContent = '2025年已过去 100%';
 
-    elements.message.innerHTML = `
-        <p class="message-text">🎉 2026新年快乐！🎉</p>
-        <p class="message-text-sub">愿新的一年，所愿皆成真</p>
-    `;
+    // 隐藏祝福语（准备显示庆祝效果）
+    elements.message.innerHTML = '';
 
-    triggerFireworks();
+    // 启动庆祝效果
+    if (typeof Celebration !== 'undefined') {
+        console.log('🎆 触发2026新年庆祝效果');
+        Celebration.start();
+    } else {
+        // 降级方案：保留原有简单烟花
+        console.log('⚠️ Celebration模块未加载，使用降级方案');
+        triggerFireworks();
+        elements.message.innerHTML = `
+            <p class="message-text">🎉 2026新年快乐！🎉</p>
+            <p class="message-text-sub">愿新的一年，所愿皆成真</p>
+        `;
+    }
 }
 
 // 烟花效果

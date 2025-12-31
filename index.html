@@ -121,5 +121,15 @@
             请启用JavaScript以查看倒计时
         </div>
     </noscript>
+
+    <!-- 庆祝效果模块（跨年特效） -->
+    <script src="celebration.js?v=2026"></script>
+
+    <!-- 音乐控制按钮（自动播放失败时显示） -->
+    <div id="musicControl" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+        <button onclick="Celebration.toggleMusic()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 20px; border-radius: 20px; cursor: pointer; backdrop-filter: blur(10px); font-size: 14px;">
+            🎵 播放音乐
+        </button>
+    </div>
 </body>
 </html>

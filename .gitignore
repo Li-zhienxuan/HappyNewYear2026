@@ -25,3 +25,7 @@ npm-debug.log*
 # 临时文件
 *.tmp
 .temp/
+
+# 音乐文件（大文件不推送）
+assets/music/*.mp3
+src/
