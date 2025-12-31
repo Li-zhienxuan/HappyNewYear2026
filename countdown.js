@@ -13,8 +13,6 @@ let clocks = {
 
 // DOM 元素
 const elements = {
-    progress: document.getElementById('progress'),
-    progressText: document.getElementById('progressText'),
     message: document.getElementById('message')
 };
 
@@ -24,6 +22,9 @@ let previousValues = {
     seconds: -1,
     milliseconds: -1
 };
+
+// 状态
+let isNewYear = false; // 是否已进入2026年
 
 // 格式化数字
 function padNumber(num, digits = 2) {
@@ -50,13 +51,14 @@ function initClocks() {
     }
 }
 
-// 更新倒计时
+// 更新倒计时（2026年到来前）
 function updateCountdown() {
     const now = Date.now();
     const difference = TARGET_DATE - now;
 
     if (difference <= 0) {
-        displayNewYear();
+        isNewYear = true;
+        updateForwardTimer();
         return;
     }
 
@@ -86,39 +88,48 @@ function updateCountdown() {
             previousValues.milliseconds = ms;
         }
     }
-
-    updateProgress(now);
 }
 
-// 更新进度条
-function updateProgress(now) {
-    const total2025 = TARGET_DATE - START_DATE;
-    const elapsed = now - START_DATE;
-    const percentage = Math.max(0, Math.min(100, (elapsed / total2025) * 100));
+// 更新正计时（2026年到来后）
+function updateForwardTimer() {
+    const now = Date.now();
+    const elapsed = now - TARGET_DATE;
 
-    elements.progress.style.width = `${percentage}%`;
-    elements.progressText.textContent = `2025年已过去 ${percentage.toFixed(6)}%`;
-}
+    // 计算分、秒、毫秒
+    const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
+    const milliseconds = elapsed % 1000;
 
-// 新年到来
-function displayNewYear() {
-    // 更新倒计时显示为00:00:00.000
+    // 更新时钟显示
     if (clocks.minutes) {
-        clocks.minutes.setValue(0);
-        clocks.seconds.setValue(0);
-        clocks.milliseconds.setValue(0);
+        // 分钟：只在值改变时翻页
+        if (minutes !== previousValues.minutes) {
+            clocks.minutes.update(minutes);
+            previousValues.minutes = minutes;
+        }
+
+        // 秒：只在值改变时翻页
+        if (seconds !== previousValues.seconds) {
+            clocks.seconds.update(seconds);
+            previousValues.seconds = seconds;
+        }
+
+        // 毫秒：快速变化，不翻页（直接更新）
+        const ms = Math.floor(milliseconds / 10);
+        if (ms !== previousValues.milliseconds) {
+            clocks.milliseconds.setValue(ms);
+            previousValues.milliseconds = ms;
+        }
     }
-
-    elements.progress.style.width = '100%';
-    elements.progressText.textContent = '2025年已过去 100%';
-
-    // 更新祝福语
-    elements.message.innerHTML = '<p>🎉 2026新年快乐！🎉</p>';
 }
 
 // 动画循环
 function animate() {
-    updateCountdown();
+    if (isNewYear) {
+        updateForwardTimer();
+    } else {
+        updateCountdown();
+    }
     requestAnimationFrame(animate);
 }
 
@@ -172,6 +183,10 @@ document.addEventListener('visibilitychange', () => {
         console.log('⏸️ 倒计时暂停');
     } else {
         console.log('▶️ 倒计时恢复');
-        updateCountdown();
+        if (isNewYear) {
+            updateForwardTimer();
+        } else {
+            updateCountdown();
+        }
     }
 });

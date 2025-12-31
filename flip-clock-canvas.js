@@ -228,6 +228,19 @@ class FlipClock {
     }
 
     /**
+     * 绘制阴影效果（模拟3D拖影）
+     */
+    drawShadow(scaleY, isTop) {
+        const alpha = Math.abs(scaleY) * 0.3;
+        const offset = isTop ? -10 : 10;
+
+        this.ctx.save();
+        this.ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+        this.ctx.fillRect(offset, -this.options.height / 2, this.options.width, this.options.height);
+        this.ctx.restore();
+    }
+
+    /**
      * 翻页动画帧
      */
     animateFlip(currentTime) {
@@ -253,12 +266,17 @@ class FlipClock {
 
         // 第一阶段：上半部分翻转
         if (elapsed < duration / 2) {
-            // 后层（显示新数字）
+            // 后层（显示新数字）- 暗一点
             this.ctx.save();
             this.drawTopClip();
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            this.ctx.fillRect(-100, -this.options.height/2, this.options.width + 200, this.options.height/2);
             this.drawText(this.nextValue);
             this.drawDivider();
             this.ctx.restore();
+
+            // 绘制阴影
+            this.drawShadow(scaleY, true);
 
             // 前层（显示旧数字，正在翻转）- 完全可见
             this.ctx.save();
@@ -284,9 +302,14 @@ class FlipClock {
             this.drawDivider();
             this.ctx.restore();
 
-            // 后层（显示旧数字）
+            // 绘制阴影
+            this.drawShadow(scaleY, false);
+
+            // 后层（显示旧数字）- 暗一点
             this.ctx.save();
             this.drawBottomClip();
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            this.ctx.fillRect(-100, 0, this.options.width + 200, this.options.height/2);
             this.drawText(this.currentValue);
             this.ctx.restore();
 
