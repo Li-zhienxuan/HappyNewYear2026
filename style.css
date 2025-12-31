@@ -190,98 +190,194 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 0.8rem;
+    gap: 1rem;
     flex-wrap: wrap;
     margin-bottom: 3rem;
 }
 
-/* ===== 翻页卡片样式 ===== */
+/* ===== 翻页时钟样式 ===== */
+.flip-unit {
+    position: relative;
+    width: clamp(90px, 12vw, 140px);
+    height: clamp(120px, 15vw, 180px);
+    perspective: 400px;
+}
+
+.flip-unit.small {
+    width: clamp(120px, 15vw, 200px);
+}
+
 .flip-card {
     position: relative;
-    width: clamp(80px, 10vw, 120px);
-    height: clamp(100px, 12vw, 140px);
-    perspective: 1000px;
-}
-
-.flip-card.small {
-    width: clamp(100px, 12vw, 160px);
-}
-
-.flip-card-inner {
-    position: relative;
     width: 100%;
     height: 100%;
-    transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
-    transform-style: preserve-3d;
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: bold;
+    line-height: 1;
 }
 
-.flip-card.flipping .flip-card-inner {
-    transform: rotateX(180deg);
+.flip-unit.small .flip-card {
+    font-size: clamp(2rem, 5vw, 4rem);
 }
 
-.flip-card-front,
-.flip-card-back {
+.flip-card .top,
+.flip-card .bottom,
+.flip-card .top-next,
+.flip-card .bottom-next {
     position: absolute;
+    left: 0;
     width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
+    height: 50%;
+    overflow: hidden;
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
     border: 2px solid rgba(0, 245, 255, 0.4);
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     box-shadow:
         0 8px 32px rgba(0, 245, 255, 0.2),
         inset 0 0 30px rgba(0, 245, 255, 0.05);
-    overflow: hidden;
 }
 
-.flip-card-front::before,
-.flip-card-back::before {
-    content: '';
+.flip-card .top,
+.flip-card .top-next {
+    top: 0;
+    border-radius: 15px 15px 0 0;
+    border-bottom: 1px solid rgba(0, 245, 255, 0.3);
+}
+
+.flip-card .bottom,
+.flip-card .bottom-next {
+    bottom: 0;
+    border-radius: 0 0 15px 15px;
+    border-top: 1px solid rgba(0, 245, 255, 0.3);
+}
+
+.flip-card .top::after,
+.flip-card .top-next::after {
+    content: attr(data-value);
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(45deg,
-        transparent,
-        rgba(0, 245, 255, 0.15),
-        transparent);
-    transform: rotate(45deg);
-    animation: shimmer 3s infinite;
-}
-
-.flip-card-back {
-    transform: rotateX(180deg);
-}
-
-.flip-value {
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
-    font-weight: 700;
+    left: 0;
+    width: 100%;
+    text-align: center;
     color: var(--accent-cyan);
-    font-family: 'Courier New', monospace;
     text-shadow:
         0 0 10px var(--accent-cyan),
         0 0 20px var(--accent-cyan),
         0 0 30px rgba(0, 245, 255, 0.5);
+    font-family: 'Courier New', monospace;
     letter-spacing: 0.05em;
-    line-height: 1;
-    z-index: 1;
 }
 
-.flip-card.small .flip-value {
-    font-size: clamp(1.8rem, 4vw, 3rem);
+.flip-card .bottom::after,
+.flip-card .bottom-next::after {
+    content: attr(data-value);
+    position: absolute;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: var(--accent-cyan);
+    text-shadow:
+        0 0 10px var(--accent-cyan),
+        0 0 20px var(--accent-cyan),
+        0 0 30px rgba(0, 245, 255, 0.5);
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.05em;
+}
+
+.flip-card .top::after {
+    top: 0;
+    transform-origin: bottom;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 50%;
+}
+
+.flip-card .top-next::after {
+    top: 0;
+    transform-origin: bottom;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 50%;
+}
+
+.flip-card .bottom::after {
+    bottom: 0;
+    transform-origin: top;
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 50%;
+}
+
+.flip-card .bottom-next::after {
+    bottom: 0;
+    transform-origin: top;
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 50%;
+}
+
+.flip-card .top {
+    z-index: 3;
+}
+
+.flip-card .bottom {
+    z-index: 2;
+}
+
+.flip-card .top-next {
+    z-index: 1;
+    opacity: 0;
+}
+
+.flip-card .bottom-next {
+    z-index: 0;
+    opacity: 0;
+}
+
+/* 翻页动画 */
+.flip-card.flipping .top {
+    animation: flip-top 0.6s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+}
+
+.flip-card.flipping .bottom-next {
+    animation: flip-bottom-next 0.6s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+}
+
+@keyframes flip-top {
+    0% {
+        transform: rotateX(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: rotateX(-90deg);
+        opacity: 0;
+    }
+}
+
+@keyframes flip-bottom-next {
+    0% {
+        transform: rotateX(90deg);
+        opacity: 0;
+    }
+    100% {
+        transform: rotateX(0deg);
+        opacity: 1;
+    }
 }
 
 .flip-divider {
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-size: clamp(3rem, 8vw, 7rem);
     font-weight: 700;
     color: var(--accent-cyan);
     text-shadow: 0 0 20px var(--accent-cyan);
-    margin: 0 0.3rem;
+    margin: 0 0.5rem;
     animation: pulse 2s ease-in-out infinite;
 }
 
@@ -394,16 +490,24 @@ body {
 /* ===== 响应式设计 ===== */
 @media (max-width: 768px) {
     .countdown-container {
-        gap: 0.4rem;
+        gap: 0.6rem;
+    }
+
+    .flip-unit {
+        width: clamp(70px, 10vw, 110px);
+        height: clamp(90px, 12vw, 140px);
+    }
+
+    .flip-unit.small {
+        width: clamp(90px, 13vw, 150px);
     }
 
     .flip-card {
-        width: clamp(60px, 9vw, 90px);
-        height: clamp(80px, 11vw, 110px);
+        font-size: clamp(2rem, 6vw, 5rem);
     }
 
-    .flip-card.small {
-        width: clamp(80px, 11vw, 120px);
+    .flip-unit.small .flip-card {
+        font-size: clamp(1.5rem, 4vw, 3rem);
     }
 
     .container {
@@ -421,30 +525,30 @@ body {
 
 @media (max-width: 480px) {
     .countdown-container {
-        gap: 0.3rem;
+        gap: 0.4rem;
         flex-wrap: nowrap;
     }
 
+    .flip-unit {
+        width: clamp(50px, 8vw, 80px);
+        height: clamp(70px, 11vw, 110px);
+    }
+
+    .flip-unit.small {
+        width: clamp(70px, 11vw, 120px);
+    }
+
     .flip-card {
-        width: clamp(50px, 8vw, 70px);
-        height: clamp(70px, 10vw, 90px);
+        font-size: clamp(1.5rem, 5vw, 3.5rem);
     }
 
-    .flip-card.small {
-        width: clamp(60px, 10vw, 90px);
-    }
-
-    .flip-value {
-        font-size: clamp(1.5rem, 5vw, 2.5rem);
-    }
-
-    .flip-card.small .flip-value {
-        font-size: clamp(1rem, 3.5vw, 1.8rem);
+    .flip-unit.small .flip-card {
+        font-size: clamp(1rem, 3.5vw, 2.5rem);
     }
 
     .flip-divider {
-        font-size: clamp(1.5rem, 5vw, 2.5rem);
-        margin: 0 0.2rem;
+        font-size: clamp(1.5rem, 5vw, 3.5rem);
+        margin: 0 0.3rem;
     }
 
     .container {

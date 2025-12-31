@@ -52,53 +52,45 @@
 
         <!-- 倒计时主显示区 -->
         <div class="countdown-container">
-            <div class="flip-card" id="hours">
-                <div class="flip-card-inner">
-                    <div class="flip-card-front">
-                        <span class="flip-value">00</span>
-                    </div>
-                    <div class="flip-card-back">
-                        <span class="flip-value">00</span>
-                    </div>
+            <div class="flip-unit" id="hours">
+                <div class="flip-card" data-current="00" data-next="00">
+                    <div class="top">00</div>
+                    <div class="bottom">00</div>
+                    <div class="top-next">00</div>
+                    <div class="bottom-next">00</div>
                 </div>
             </div>
 
             <div class="flip-divider">:</div>
 
-            <div class="flip-card" id="minutes">
-                <div class="flip-card-inner">
-                    <div class="flip-card-front">
-                        <span class="flip-value">00</span>
-                    </div>
-                    <div class="flip-card-back">
-                        <span class="flip-value">00</span>
-                    </div>
+            <div class="flip-unit" id="minutes">
+                <div class="flip-card" data-current="00" data-next="00">
+                    <div class="top">00</div>
+                    <div class="bottom">00</div>
+                    <div class="top-next">00</div>
+                    <div class="bottom-next">00</div>
                 </div>
             </div>
 
             <div class="flip-divider">:</div>
 
-            <div class="flip-card" id="seconds">
-                <div class="flip-card-inner">
-                    <div class="flip-card-front">
-                        <span class="flip-value">00</span>
-                    </div>
-                    <div class="flip-card-back">
-                        <span class="flip-value">00</span>
-                    </div>
+            <div class="flip-unit" id="seconds">
+                <div class="flip-card" data-current="00" data-next="00">
+                    <div class="top">00</div>
+                    <div class="bottom">00</div>
+                    <div class="top-next">00</div>
+                    <div class="bottom-next">00</div>
                 </div>
             </div>
 
             <div class="flip-divider">.</div>
 
-            <div class="flip-card small" id="milliseconds">
-                <div class="flip-card-inner">
-                    <div class="flip-card-front">
-                        <span class="flip-value">000</span>
-                    </div>
-                    <div class="flip-card-back">
-                        <span class="flip-value">000</span>
-                    </div>
+            <div class="flip-unit small" id="milliseconds">
+                <div class="flip-card" data-current="000" data-next="000">
+                    <div class="top">000</div>
+                    <div class="bottom">000</div>
+                    <div class="top-next">000</div>
+                    <div class="bottom-next">000</div>
                 </div>
             </div>
         </div>

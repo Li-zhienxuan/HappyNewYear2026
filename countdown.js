@@ -1,9 +1,9 @@
 // ===== 2026新年倒计时 =====
-// 精确到毫秒的实时倒计时，翻页效果
+// 真正的翻页时钟效果
 
 // 目标时间：2026年1月1日 00:00:00
 const TARGET_DATE = new Date('2026-01-01T00:00:00').getTime();
-const START_DATE = new Date('2025-01-01T00:00:00').getTime(); // 2025年开始
+const START_DATE = new Date('2025-01-01T00:00:00').getTime();
 
 // 存储上一个值的对象
 let previousValues = {
@@ -25,82 +25,101 @@ const elements = {
     message: document.getElementById('message')
 };
 
-// 格式化数字，确保两位/三位数
+// 格式化数字
 function padNumber(num, digits = 2) {
     return num.toString().padStart(digits, '0');
 }
 
-// 更新翻页卡片的值（带动画）
-function updateFlipCard(element, value, type) {
+// 更新翻页时钟
+function updateFlipUnit(element, value, type) {
     const paddedValue = padNumber(value, type === 'milliseconds' ? 3 : 2);
-    const frontValue = element.querySelector('.flip-card-front .flip-value');
-    const backValue = element.querySelector('.flip-card-back .flip-value');
+    const flipCard = element.querySelector('.flip-card');
 
-    // 检查值是否改变
-    if (previousValues[type] !== null && previousValues[type] !== paddedValue) {
-        // 设置背面的新值
-        backValue.textContent = paddedValue;
+    if (!flipCard) return;
+
+    const top = flipCard.querySelector('.top');
+    const bottom = flipCard.querySelector('.bottom');
+    const topNext = flipCard.querySelector('.top-next');
+    const bottomNext = flipCard.querySelector('.bottom-next');
+
+    const currentValue = flipCard.dataset.current;
+
+    // 如果值改变了，触发翻页动画
+    if (currentValue !== paddedValue) {
+        // 设置下一个值
+        topNext.setAttribute('data-value', paddedValue);
+        bottomNext.setAttribute('data-value', paddedValue);
 
         // 添加翻页动画类
-        element.classList.add('flipping');
+        flipCard.classList.add('flipping');
 
-        // 动画完成后更新正面值并移除动画类
+        // 动画完成后更新当前值
         setTimeout(() => {
-            frontValue.textContent = paddedValue;
-            element.classList.remove('flipping');
-        }, 500); // 与CSS transition时间一致
-    } else if (previousValues[type] === null) {
-        // 初始化时直接设置
-        frontValue.textContent = paddedValue;
-        backValue.textContent = paddedValue;
+            top.setAttribute('data-value', paddedValue);
+            bottom.setAttribute('data-value', paddedValue);
+            topNext.setAttribute('data-value', paddedValue);
+            bottomNext.setAttribute('data-value', paddedValue);
+            flipCard.classList.remove('flipping');
+        }, 600);
+
+        // 更新数据属性
+        flipCard.dataset.current = paddedValue;
+    } else if (currentValue === '00' || currentValue === '000') {
+        // 初始化时设置值
+        top.setAttribute('data-value', paddedValue);
+        bottom.setAttribute('data-value', paddedValue);
+        topNext.setAttribute('data-value', paddedValue);
+        bottomNext.setAttribute('data-value', paddedValue);
+        flipCard.dataset.current = paddedValue;
     }
 
-    // 更新存储的值
     previousValues[type] = paddedValue;
 }
 
-// 直接更新毫秒显示（不带翻页动画）
-function updateMilliseconds(milliseconds) {
-    const paddedValue = padNumber(milliseconds, 3);
-    const msCard = elements.milliseconds;
-    const frontValue = msCard.querySelector('.flip-card-front .flip-value');
-    const backValue = msCard.querySelector('.flip-card-back .flip-value');
+// 直接更新毫秒（不翻页）
+function updateMilliseconds(element, value) {
+    const paddedValue = padNumber(value, 3);
+    const flipCard = element.querySelector('.flip-card');
 
-    // 毫秒直接更新，不触发翻页动画
-    frontValue.textContent = paddedValue;
-    backValue.textContent = paddedValue;
+    if (!flipCard) return;
+
+    const top = flipCard.querySelector('.top');
+    const bottom = flipCard.querySelector('.bottom');
+    const topNext = flipCard.querySelector('.top-next');
+    const bottomNext = flipCard.querySelector('.bottom-next');
+
+    // 直接更新所有部分，不触发动画
+    top.setAttribute('data-value', paddedValue);
+    bottom.setAttribute('data-value', paddedValue);
+    topNext.setAttribute('data-value', paddedValue);
+    bottomNext.setAttribute('data-value', paddedValue);
+    flipCard.dataset.current = paddedValue;
 }
 
-// 更新倒计时显示
+// 更新倒计时
 function updateCountdown() {
     const now = Date.now();
     const difference = TARGET_DATE - now;
 
-    // 检查是否已经到达2026年
     if (difference <= 0) {
         displayNewYear();
         return;
     }
 
-    // 计算时间单位
-    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
     const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((difference % (1000 * 60)) / 1000);
     const milliseconds = difference % 1000;
 
-    // 使用翻页效果更新时分秒（带动画）
-    updateFlipCard(elements.hours, hours, 'hours');
-    updateFlipCard(elements.minutes, minutes, 'minutes');
-    updateFlipCard(elements.seconds, seconds, 'seconds');
+    // 时分秒使用翻页动画
+    updateFlipUnit(elements.hours, hours, 'hours');
+    updateFlipUnit(elements.minutes, minutes, 'minutes');
+    updateFlipUnit(elements.seconds, seconds, 'seconds');
 
-    // 毫秒直接更新，不带翻页动画
-    updateMilliseconds(milliseconds);
+    // 毫秒直接更新
+    updateMilliseconds(elements.milliseconds, milliseconds);
 
-    // 更新进度条（2025年已过百分比）
     updateProgress(now);
-
-    // 更新当前时间显示
     updateCurrentTime();
 }
 
@@ -114,7 +133,7 @@ function updateProgress(now) {
     elements.progressText.textContent = `2025年已过去 ${percentage.toFixed(6)}%`;
 }
 
-// 更新当前时间显示
+// 更新当前时间
 function updateCurrentTime() {
     const now = new Date();
     const hours = padNumber(now.getHours());
@@ -125,30 +144,27 @@ function updateCurrentTime() {
     elements.currentTimeDisplay.textContent = `${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
-// 新年到来时的显示
+// 新年到来
 function displayNewYear() {
     document.body.classList.add('new-year-arrived');
 
-    // 更新所有翻页卡片为00
-    updateFlipCard(elements.hours, 0, 'hours');
-    updateFlipCard(elements.minutes, 0, 'minutes');
-    updateFlipCard(elements.seconds, 0, 'seconds');
-    updateFlipCard(elements.milliseconds, 0, 'milliseconds');
+    updateFlipUnit(elements.hours, 0, 'hours');
+    updateFlipUnit(elements.minutes, 0, 'minutes');
+    updateFlipUnit(elements.seconds, 0, 'seconds');
+    updateMilliseconds(elements.milliseconds, 0);
 
     elements.progress.style.width = '100%';
     elements.progressText.textContent = '2025年已过去 100%';
 
-    // 更改祝福语
     elements.message.innerHTML = `
         <p class="message-text">🎉 2026新年快乐！🎉</p>
         <p class="message-text-sub">愿新的一年，所愿皆成真</p>
     `;
 
-    // 触发烟花效果（可选）
     triggerFireworks();
 }
 
-// 简单的烟花效果（用粒子实现）
+// 烟花效果
 function triggerFireworks() {
     const container = document.getElementById('particles');
 
@@ -194,21 +210,20 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// 创建背景粒子效果（彩色粒子）
+// 创建粒子
 function createParticles() {
     const container = document.getElementById('particles');
-    const particleCount = 60; // 增加粒子数量
+    const particleCount = 60;
 
     for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
-        // 随机分配颜色：青色、粉色、金色
         const colorClass = Math.random() < 0.33 ? 'particle pink' :
                           Math.random() < 0.66 ? 'particle gold' : 'particle';
         particle.className = colorClass;
 
-        const size = Math.random() * 6 + 2; // 稍微增大粒子
+        const size = Math.random() * 6 + 2;
         const left = Math.random() * 100;
-        const animationDuration = Math.random() * 12 + 8; // 8-20秒
+        const animationDuration = Math.random() * 12 + 8;
         const animationDelay = Math.random() * 15;
 
         particle.style.cssText = `
@@ -223,9 +238,9 @@ function createParticles() {
     }
 }
 
-// 使用 requestAnimationFrame 实现流畅的毫秒级更新
+// 动画循环
 let lastUpdate = 0;
-const updateInterval = 16; // 约60fps
+const updateInterval = 16;
 
 function animate(currentTime) {
     if (currentTime - lastUpdate >= updateInterval) {
@@ -238,25 +253,23 @@ function animate(currentTime) {
 // 初始化
 function init() {
     createParticles();
-    updateCountdown(); // 立即执行一次
-    requestAnimationFrame(animate); // 开始动画循环
+    updateCountdown();
+    requestAnimationFrame(animate);
 }
 
-// 页面加载完成后启动
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
     init();
 }
 
-// 添加页面可见性检测，节省资源
+// 页面可见性检测
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        // 页面隐藏时可以降低更新频率
-        console.log('Countdown paused - page hidden');
+        console.log('Countdown paused');
     } else {
-        // 页面可见时恢复正常更新
-        console.log('Countdown resumed - page visible');
+        console.log('Countdown resumed');
         updateCountdown();
     }
 });
+
