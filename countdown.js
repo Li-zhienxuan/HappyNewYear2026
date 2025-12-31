@@ -30,7 +30,7 @@ function padNumber(num, digits = 2) {
     return num.toString().padStart(digits, '0');
 }
 
-// 更新翻页卡片的值
+// 更新翻页卡片的值（带动画）
 function updateFlipCard(element, value, type) {
     const paddedValue = padNumber(value, type === 'milliseconds' ? 3 : 2);
     const frontValue = element.querySelector('.flip-card-front .flip-value');
@@ -59,6 +59,18 @@ function updateFlipCard(element, value, type) {
     previousValues[type] = paddedValue;
 }
 
+// 直接更新毫秒显示（不带翻页动画）
+function updateMilliseconds(milliseconds) {
+    const paddedValue = padNumber(milliseconds, 3);
+    const msCard = elements.milliseconds;
+    const frontValue = msCard.querySelector('.flip-card-front .flip-value');
+    const backValue = msCard.querySelector('.flip-card-back .flip-value');
+
+    // 毫秒直接更新，不触发翻页动画
+    frontValue.textContent = paddedValue;
+    backValue.textContent = paddedValue;
+}
+
 // 更新倒计时显示
 function updateCountdown() {
     const now = Date.now();
@@ -77,11 +89,13 @@ function updateCountdown() {
     const seconds = Math.floor((difference % (1000 * 60)) / 1000);
     const milliseconds = difference % 1000;
 
-    // 使用翻页效果更新显示
+    // 使用翻页效果更新时分秒（带动画）
     updateFlipCard(elements.hours, hours, 'hours');
     updateFlipCard(elements.minutes, minutes, 'minutes');
     updateFlipCard(elements.seconds, seconds, 'seconds');
-    updateFlipCard(elements.milliseconds, milliseconds, 'milliseconds');
+
+    // 毫秒直接更新，不带翻页动画
+    updateMilliseconds(milliseconds);
 
     // 更新进度条（2025年已过百分比）
     updateProgress(now);
