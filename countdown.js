@@ -163,7 +163,7 @@ function init() {
     if (typeof Fireworks !== 'undefined') {
         const fireworks = new Fireworks();
         fireworks.start();
-        console.log('🎆 烟花效果已启动');
+        console.log('🎊 祝福语效果已启动');
     }
 
     // 初始更新

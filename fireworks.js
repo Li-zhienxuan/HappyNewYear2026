@@ -1,11 +1,24 @@
 /**
- * 烟花效果 - Canvas实现
+ * 烟花祝福语效果 - 满屏飘落
  */
 
 class Fireworks {
     constructor() {
-        this.canvas = document.createElement('canvas');
-        this.canvas.style.cssText = `
+        this.blessings = [
+            '新年快乐', '万事如意', '心想事成', '身体健康',
+            '大吉大利', '财源广进', '幸福美满', '前程似锦',
+            '步步高升', '吉祥如意', '福气满满', '好运连连',
+            '恭喜发财', '年年有余', '团团圆圆', '平安喜乐',
+            '2026', 'Happy New Year', 'Good Luck', 'Best Wishes'
+        ];
+
+        this.colors = [
+            '#ff6b9d', '#ffd700', '#00ffff', '#a58cff',
+            '#ff4757', '#2ed573', '#ffa502', '#ffffff'
+        ];
+
+        this.container = document.createElement('div');
+        this.container.style.cssText = `
             position: fixed;
             top: 0;
             left: 0;
@@ -13,152 +26,106 @@ class Fireworks {
             height: 100%;
             pointer-events: none;
             z-index: 1;
+            overflow: hidden;
         `;
-        document.body.appendChild(this.canvas);
+        document.body.appendChild(this.container);
 
-        this.ctx = this.canvas.getContext('2d');
-        this.fireworks = [];
-        this.particles = [];
         this.isActive = true;
-
-        this.resize();
-        window.addEventListener('resize', () => this.resize());
-
-        this.animate();
-    }
-
-    resize() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
+        this.createInterval = null;
     }
 
     /**
-     * 创建烟花
+     * 创建单个祝福语
      */
-    createFirework(x, y) {
-        const firework = {
-            x: x,
-            y: this.canvas.height,
-            targetY: y,
-            speed: 8 + Math.random() * 4,
-            color: `hsl(${Math.random() * 360}, 100%, 60%)`,
-            trail: []
-        };
-        this.fireworks.push(firework);
-    }
-
-    /**
-     * 创建爆炸粒子
-     */
-    createParticles(x, y, color) {
-        const particleCount = 50 + Math.random() * 50;
-        for (let i = 0; i < particleCount; i++) {
-            const angle = (Math.PI * 2 / particleCount) * i;
-            const speed = 2 + Math.random() * 4;
-            this.particles.push({
-                x: x,
-                y: y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                color: color,
-                alpha: 1,
-                decay: 0.01 + Math.random() * 0.02,
-                gravity: 0.05
-            });
-        }
-    }
-
-    /**
-     * 更新烟花
-     */
-    update() {
-        // 更新上升的烟花
-        for (let i = this.fireworks.length - 1; i >= 0; i--) {
-            const fw = this.fireworks[i];
-            fw.y -= fw.speed;
-            fw.trail.push({ x: fw.x, y: fw.y });
-
-            if (fw.trail.length > 10) {
-                fw.trail.shift();
-            }
-
-            if (fw.y <= fw.targetY) {
-                this.createParticles(fw.x, fw.y, fw.color);
-                this.fireworks.splice(i, 1);
-            }
-        }
-
-        // 更新粒子
-        for (let i = this.particles.length - 1; i >= 0; i--) {
-            const p = this.particles[i];
-            p.x += p.vx;
-            p.y += p.vy;
-            p.vy += p.gravity;
-            p.alpha -= p.decay;
-
-            if (p.alpha <= 0) {
-                this.particles.splice(i, 1);
-            }
-        }
-    }
-
-    /**
-     * 绘制
-     */
-    draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // 绘制上升的烟花
-        this.fireworks.forEach(fw => {
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = fw.color;
-            this.ctx.lineWidth = 2;
-
-            if (fw.trail.length > 0) {
-                this.ctx.moveTo(fw.trail[0].x, fw.trail[0].y);
-                fw.trail.forEach(point => {
-                    this.ctx.lineTo(point.x, point.y);
-                });
-            }
-            this.ctx.lineTo(fw.x, fw.y);
-            this.ctx.stroke();
-        });
-
-        // 绘制粒子
-        this.particles.forEach(p => {
-            this.ctx.save();
-            this.ctx.globalAlpha = p.alpha;
-            this.ctx.fillStyle = p.color;
-            this.ctx.beginPath();
-            this.ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-            this.ctx.fill();
-            this.ctx.restore();
-        });
-    }
-
-    /**
-     * 动画循环
-     */
-    animate() {
+    createBlessing() {
         if (!this.isActive) return;
 
-        this.update();
-        this.draw();
-        requestAnimationFrame(() => this.animate());
+        const blessing = document.createElement('div');
+        const text = this.blessings[Math.floor(Math.random() * this.blessings.length)];
+        const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+
+        // 随机起始位置和方向
+        const side = Math.floor(Math.random() * 4); // 0:上, 1:右, 2:下, 3:左
+        let startX, startY, endX, endY;
+
+        switch(side) {
+            case 0: // 从上往下
+                startX = Math.random() * 100;
+                startY = -10;
+                endX = startX + (Math.random() - 0.5) * 30;
+                endY = 110;
+                break;
+            case 1: // 从右往左
+                startX = 110;
+                startY = Math.random() * 100;
+                endX = -10;
+                endY = startY + (Math.random() - 0.5) * 30;
+                break;
+            case 2: // 从下往上
+                startX = Math.random() * 100;
+                startY = 110;
+                endX = startX + (Math.random() - 0.5) * 30;
+                endY = -10;
+                break;
+            case 3: // 从左往右
+                startX = -10;
+                startY = Math.random() * 100;
+                endX = 110;
+                endY = startY + (Math.random() - 0.5) * 30;
+                break;
+        }
+
+        const size = 1 + Math.random() * 1.5; // 1rem - 2.5rem
+        const duration = 4 + Math.random() * 4; // 4-8秒
+
+        blessing.textContent = text;
+        blessing.style.cssText = `
+            position: absolute;
+            left: ${startX}%;
+            top: ${startY}%;
+            font-size: ${size}rem;
+            color: ${color};
+            font-weight: bold;
+            white-space: nowrap;
+            text-shadow: 0 0 10px ${color}, 0 0 20px ${color};
+            animation: blessingFloat ${duration}s ease-out forwards;
+            opacity: 0;
+        `;
+
+        this.container.appendChild(blessing);
+
+        // 动画结束后移除
+        setTimeout(() => {
+            if (blessing.parentNode) {
+                blessing.remove();
+            }
+        }, duration * 1000);
     }
 
     /**
-     * 随机发射烟花
+     * 添加动画关键帧
      */
-    launchRandom() {
-        if (!this.isActive) return;
-
-        const x = Math.random() * this.canvas.width;
-        const y = 100 + Math.random() * (this.canvas.height / 2);
-        this.createFirework(x, y);
-
-        // 随机间隔发射下一个
-        setTimeout(() => this.launchRandom(), 500 + Math.random() * 1500);
+    addKeyframes() {
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes blessingFloat {
+                0% {
+                    transform: translate(0, 0) scale(0.5);
+                    opacity: 0;
+                }
+                10% {
+                    opacity: 1;
+                }
+                90% {
+                    opacity: 1;
+                }
+                100% {
+                    transform: translate(${Math.random() * 20 - 10}px, ${Math.random() * 20 - 10}px) scale(1);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     /**
@@ -166,12 +133,19 @@ class Fireworks {
      */
     start() {
         this.isActive = true;
-        // 立即发射几个烟花
-        for (let i = 0; i < 3; i++) {
-            setTimeout(() => this.launchRandom(), i * 300);
+        this.addKeyframes();
+
+        // 立即创建一些祝福语
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => this.createBlessing(), i * 200);
         }
-        // 持续发射
-        this.launchRandom();
+
+        // 持续创建祝福语（每300ms创建一个）
+        this.createInterval = setInterval(() => {
+            this.createBlessing();
+        }, 300);
+
+        console.log('🎊 祝福语效果已启动');
     }
 
     /**
@@ -179,9 +153,11 @@ class Fireworks {
      */
     stop() {
         this.isActive = false;
-        this.fireworks = [];
-        this.particles = [];
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        if (this.createInterval) {
+            clearInterval(this.createInterval);
+            this.createInterval = null;
+        }
+        this.container.innerHTML = '';
     }
 
     /**
@@ -189,8 +165,7 @@ class Fireworks {
      */
     destroy() {
         this.stop();
-        this.canvas.remove();
-        window.removeEventListener('resize', () => this.resize());
+        this.container.remove();
     }
 }
 
