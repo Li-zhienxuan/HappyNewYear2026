@@ -14,7 +14,7 @@ const elements = {
     milliseconds: document.getElementById('milliseconds'),
     progress: document.getElementById('progress'),
     progressText: document.getElementById('progressText'),
-    currentTime: document.getElementById('currentTime'),
+    currentTimeDisplay: document.getElementById('currentTimeDisplay'),
     message: document.getElementById('message')
 };
 
@@ -68,16 +68,12 @@ function updateProgress(now) {
 // 更新当前时间显示
 function updateCurrentTime() {
     const now = new Date();
-    const timeString = now.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-    });
-    elements.currentTime.textContent = `当前时间: ${timeString}`;
+    const hours = padNumber(now.getHours());
+    const minutes = padNumber(now.getMinutes());
+    const seconds = padNumber(now.getSeconds());
+    const milliseconds = padNumber(now.getMilliseconds(), 3);
+
+    elements.currentTimeDisplay.textContent = `${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
 // 新年到来时的显示
@@ -149,19 +145,22 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// 创建背景粒子效果
+// 创建背景粒子效果（彩色粒子）
 function createParticles() {
     const container = document.getElementById('particles');
-    const particleCount = 50;
+    const particleCount = 60; // 增加粒子数量
 
     for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
-        particle.className = 'particle';
+        // 随机分配颜色：青色、粉色、金色
+        const colorClass = Math.random() < 0.33 ? 'particle pink' :
+                          Math.random() < 0.66 ? 'particle gold' : 'particle';
+        particle.className = colorClass;
 
-        const size = Math.random() * 5 + 2;
+        const size = Math.random() * 6 + 2; // 稍微增大粒子
         const left = Math.random() * 100;
-        const animationDuration = Math.random() * 10 + 10;
-        const animationDelay = Math.random() * 10;
+        const animationDuration = Math.random() * 12 + 8; // 8-20秒
+        const animationDelay = Math.random() * 15;
 
         particle.style.cssText = `
             width: ${size}px;

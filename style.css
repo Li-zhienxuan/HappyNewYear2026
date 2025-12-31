@@ -6,24 +6,37 @@
 }
 
 :root {
-    /* 温柔色调 - 渐变背景 */
-    --bg-gradient-start: #1a1a2e  /* 深蓝 */
-    --bg-gradient-mid: #16213e    /* 中蓝 */
-    --bg-gradient-end: #0f3460    /* 亮蓝 */
-    --accent-glow: #e94560        /* 温柔粉红 */
-    --accent-secondary: #533483   /* 紫色 */
-    --accent-cyan: #00d9ff        /* 青色 - 科技感 */
-    --text-primary: #ffffff
-    --text-secondary: rgba(255, 255, 255, 0.7)
-    --text-glow: rgba(233, 69, 96, 0.8)
+    /* 2025流行渐变配色 - 基于搜索结果优化 */
+    --bg-gradient-start: #0a0a1a;  /* 深邃黑蓝 */
+    --bg-gradient-mid1: #1a103c;   /* 深紫 */
+    --bg-gradient-mid2: #2d1b69;   /* 紫蓝 */
+    --bg-gradient-mid3: #3A41C6;   /* 靛蓝 */
+    --bg-gradient-end: #00d9ff;    /* 亮青色 */
+
+    --accent-glow: #ff6b9d;        /* 温柔粉红 - 2025流行 */
+    --accent-secondary: #a58cff;   /* 淡紫 */
+    --accent-cyan: #00f5ff;        /* 亮青色 - 科技感 */
+    --accent-gold: #ffd700;        /* 金色点缀 */
+
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.8);
+    --text-glow: rgba(255, 107, 157, 0.6);
 }
 
 body {
     font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-    background: linear-gradient(135deg,
-        var(--bg-gradient-start) 0%,
-        var(--bg-gradient-mid) 50%,
-        var(--bg-gradient-end) 100%);
+    background:
+        radial-gradient(circle at 20% 50%, rgba(58, 65, 198, 0.15), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 107, 157, 0.1), transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(0, 245, 255, 0.1), transparent 50%),
+        linear-gradient(135deg,
+            var(--bg-gradient-start) 0%,
+            var(--bg-gradient-mid1) 20%,
+            var(--bg-gradient-mid2) 40%,
+            var(--bg-gradient-mid3) 60%,
+            var(--bg-gradient-end) 100%);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 200% 200%;
+    animation: bgShift 15s ease infinite;
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -31,6 +44,15 @@ body {
     overflow-x: hidden;
     color: var(--text-primary);
     position: relative;
+}
+
+@keyframes bgShift {
+    0%, 100% {
+        background-position: 0% 50%, 0% 50%, 0% 50%, 0% 50%;
+    }
+    50% {
+        background-position: 0% 50%, 0% 50%, 0% 50%, 100% 50%;
+    }
 }
 
 /* ===== 背景粒子效果 ===== */
@@ -50,7 +72,15 @@ body {
     background: radial-gradient(circle, var(--accent-cyan), transparent);
     border-radius: 50%;
     animation: float 15s infinite;
-    opacity: 0.3;
+    opacity: 0.4;
+}
+
+.particle.pink {
+    background: radial-gradient(circle, var(--accent-glow), transparent);
+}
+
+.particle.gold {
+    background: radial-gradient(circle, var(--accent-gold), transparent);
 }
 
 @keyframes float {
@@ -59,10 +89,10 @@ body {
         opacity: 0;
     }
     10% {
-        opacity: 0.3;
+        opacity: 0.4;
     }
     90% {
-        opacity: 0.3;
+        opacity: 0.4;
     }
     100% {
         transform: translateY(-100px) scale(1);
@@ -103,19 +133,20 @@ body {
 
 .title-main {
     display: block;
-    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-size: clamp(2rem, 10vw, 6rem);
     font-weight: 700;
     background: linear-gradient(135deg,
         var(--accent-cyan),
         var(--accent-glow),
-        var(--accent-secondary));
-    background-size: 200% 200%;
+        var(--accent-secondary),
+        var(--accent-gold));
+    background-size: 300% 300%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: gradientShift 3s ease infinite;
-    text-shadow: 0 0 30px var(--text-glow);
-    letter-spacing: 0.1em;
+    animation: gradientShift 4s ease infinite;
+    filter: drop-shadow(0 0 30px var(--text-glow));
+    letter-spacing: 0.15em;
 }
 
 .title-sub {
@@ -358,28 +389,121 @@ body {
 /* ===== 响应式设计 ===== */
 @media (max-width: 768px) {
     .countdown-container {
-        gap: 0.8rem;
+        gap: 0.6rem;
     }
 
     .time-display {
-        padding: 1.5rem;
-        min-width: 80px;
+        padding: 1.2rem 1rem;
+        min-width: 70px;
     }
 
     .container {
-        padding: 1rem;
+        padding: 1.5rem 1rem;
+    }
+
+    .header {
+        margin-bottom: 2rem;
+    }
+
+    .title-main {
+        letter-spacing: 0.05em;
     }
 }
 
 @media (max-width: 480px) {
     .countdown-container {
-        flex-direction: column;
-        gap: 1rem;
+        gap: 0.5rem;
     }
 
     .time-display {
+        padding: 1rem 0.8rem;
+        min-width: 60px;
+        border-radius: 15px;
+    }
+
+    .time-value {
+        font-size: clamp(1.8rem, 8vw, 3rem);
+    }
+
+    .milliseconds .time-value {
+        font-size: clamp(1rem, 4vw, 1.5rem);
+    }
+
+    .time-label {
+        font-size: 0.65rem;
+        margin-top: 0.5rem;
+    }
+
+    .container {
+        padding: 1rem 0.5rem;
+    }
+
+    .header {
+        margin-bottom: 1.5rem;
+    }
+
+    /* 手机端使用网格布局，更紧凑 */
+    .countdown-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
         width: 100%;
-        min-width: unset;
+        max-width: 400px;
+        margin: 0 auto 2rem;
+    }
+
+    .time-block:nth-child(4),
+    .time-block:nth-child(5) {
+        grid-column: span 1;
+    }
+}
+
+/* ===== 当前时间显示区域 ===== */
+.current-time-section {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 245, 255, 0.2);
+    border-radius: 15px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    display: inline-block;
+    box-shadow:
+        0 4px 20px rgba(0, 245, 255, 0.1),
+        inset 0 0 20px rgba(0, 245, 255, 0.03);
+}
+
+.current-time-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.current-time-display {
+    font-size: clamp(1.2rem, 4vw, 2rem);
+    font-family: 'Courier New', monospace;
+    color: var(--accent-cyan);
+    text-shadow:
+        0 0 10px var(--accent-cyan),
+        0 0 20px rgba(0, 245, 255, 0.5);
+    letter-spacing: 0.1em;
+    font-weight: 600;
+}
+
+@media (max-width: 480px) {
+    .current-time-section {
+        padding: 0.8rem 1rem;
+        width: 90%;
+        max-width: 350px;
+    }
+
+    .current-time-display {
+        font-size: clamp(1rem, 3.5vw, 1.5rem);
+    }
+
+    .current-time-label {
+        font-size: 0.65rem;
     }
 }
 
