@@ -1,12 +1,12 @@
 // ===== 2026新年倒计时 =====
-// 真正的翻页时钟效果
+// Canvas翻页时钟实现
 
 // 目标时间：2026年1月1日 00:00:00
 const TARGET_DATE = new Date('2026-01-01T00:00:00').getTime();
 const START_DATE = new Date('2025-01-01T00:00:00').getTime();
 
-// 存储上一个值的对象
-let previousValues = {
+// Canvas翻页时钟实例
+let canvasClocks = {
     hours: null,
     minutes: null,
     seconds: null,
@@ -15,14 +15,18 @@ let previousValues = {
 
 // DOM 元素
 const elements = {
-    hours: document.getElementById('hours'),
-    minutes: document.getElementById('minutes'),
-    seconds: document.getElementById('seconds'),
-    milliseconds: document.getElementById('milliseconds'),
     progress: document.getElementById('progress'),
     progressText: document.getElementById('progressText'),
     currentTimeDisplay: document.getElementById('currentTimeDisplay'),
     message: document.getElementById('message')
+};
+
+// 上一次的值（用于判断是否需要更新）
+let previousValues = {
+    hours: -1,
+    minutes: -1,
+    seconds: -1,
+    milliseconds: -1
 };
 
 // 格式化数字
@@ -30,70 +34,75 @@ function padNumber(num, digits = 2) {
     return num.toString().padStart(digits, '0');
 }
 
-// 更新翻页时钟
-function updateFlipUnit(element, value, type) {
-    const paddedValue = padNumber(value, type === 'milliseconds' ? 3 : 2);
-    const flipCard = element.querySelector('.flip-card');
-
-    if (!flipCard) return;
-
-    const top = flipCard.querySelector('.top');
-    const bottom = flipCard.querySelector('.bottom');
-    const topNext = flipCard.querySelector('.top-next');
-    const bottomNext = flipCard.querySelector('.bottom-next');
-
-    const currentValue = flipCard.dataset.current;
-
-    // 如果值改变了，触发翻页动画
-    if (currentValue !== paddedValue) {
-        // 设置下一个值
-        topNext.setAttribute('data-value', paddedValue);
-        bottomNext.setAttribute('data-value', paddedValue);
-
-        // 添加翻页动画类
-        flipCard.classList.add('flipping');
-
-        // 动画完成后更新当前值
-        setTimeout(() => {
-            top.setAttribute('data-value', paddedValue);
-            bottom.setAttribute('data-value', paddedValue);
-            topNext.setAttribute('data-value', paddedValue);
-            bottomNext.setAttribute('data-value', paddedValue);
-            flipCard.classList.remove('flipping');
-        }, 600);
-
-        // 更新数据属性
-        flipCard.dataset.current = paddedValue;
-    } else if (currentValue === '00' || currentValue === '000') {
-        // 初始化时设置值
-        top.setAttribute('data-value', paddedValue);
-        bottom.setAttribute('data-value', paddedValue);
-        topNext.setAttribute('data-value', paddedValue);
-        bottomNext.setAttribute('data-value', paddedValue);
-        flipCard.dataset.current = paddedValue;
+// 初始化Canvas时钟
+function initCanvasClocks() {
+    // 等待CanvasFlipClock类加载
+    if (typeof CanvasFlipClock === 'undefined') {
+        console.error('CanvasFlipClock未加载，请确保flip-clock-canvas.js已引入');
+        return false;
     }
 
-    previousValues[type] = paddedValue;
+    try {
+        canvasClocks.hours = new CanvasFlipClock('canvas-hours', {
+            fontSize: 660,
+            fontFamily: 'Arial Black, Arial, sans-serif',
+            showBackground: true,
+            animationDuration: 600
+        });
+
+        canvasClocks.minutes = new CanvasFlipClock('canvas-minutes', {
+            fontSize: 660,
+            fontFamily: 'Arial Black, Arial, sans-serif',
+            showBackground: true,
+            animationDuration: 600
+        });
+
+        canvasClocks.seconds = new CanvasFlipClock('canvas-seconds', {
+            fontSize: 660,
+            fontFamily: 'Arial Black, Arial, sans-serif',
+            showBackground: true,
+            animationDuration: 600
+        });
+
+        canvasClocks.milliseconds = new CanvasFlipClock('canvas-milliseconds', {
+            fontSize: 660,
+            fontFamily: 'Arial Black, Arial, sans-serif',
+            showBackground: true,
+            animationDuration: 600
+        });
+
+        console.log('✅ Canvas时钟初始化成功');
+        return true;
+    } catch (error) {
+        console.error('❌ Canvas时钟初始化失败:', error);
+        return false;
+    }
 }
 
-// 直接更新毫秒（不翻页）
-function updateMilliseconds(element, value) {
-    const paddedValue = padNumber(value, 3);
-    const flipCard = element.querySelector('.flip-card');
+// 更新Canvas时钟
+function updateCanvasClock(time) {
+    // 只在值改变时触发翻页动画
+    if (time.hours !== previousValues.hours) {
+        canvasClocks.hours.update(time.hours);
+        previousValues.hours = time.hours;
+    }
 
-    if (!flipCard) return;
+    if (time.minutes !== previousValues.minutes) {
+        canvasClocks.minutes.update(time.minutes);
+        previousValues.minutes = time.minutes;
+    }
 
-    const top = flipCard.querySelector('.top');
-    const bottom = flipCard.querySelector('.bottom');
-    const topNext = flipCard.querySelector('.top-next');
-    const bottomNext = flipCard.querySelector('.bottom-next');
+    if (time.seconds !== previousValues.seconds) {
+        canvasClocks.seconds.update(time.seconds);
+        previousValues.seconds = time.seconds;
+    }
 
-    // 直接更新所有部分，不触发动画
-    top.setAttribute('data-value', paddedValue);
-    bottom.setAttribute('data-value', paddedValue);
-    topNext.setAttribute('data-value', paddedValue);
-    bottomNext.setAttribute('data-value', paddedValue);
-    flipCard.dataset.current = paddedValue;
+    // 毫秒不需要翻页动画，每100ms更新一次显示
+    const ms = Math.floor(time.milliseconds / 10);
+    if (ms !== previousValues.milliseconds) {
+        canvasClocks.milliseconds.setValue(ms);
+        previousValues.milliseconds = ms;
+    }
 }
 
 // 更新倒计时
@@ -111,13 +120,12 @@ function updateCountdown() {
     const seconds = Math.floor((difference % (1000 * 60)) / 1000);
     const milliseconds = difference % 1000;
 
-    // 时分秒使用翻页动画
-    updateFlipUnit(elements.hours, hours, 'hours');
-    updateFlipUnit(elements.minutes, minutes, 'minutes');
-    updateFlipUnit(elements.seconds, seconds, 'seconds');
+    const time = { hours, minutes, seconds, milliseconds };
 
-    // 毫秒直接更新
-    updateMilliseconds(elements.milliseconds, milliseconds);
+    // 使用Canvas更新显示
+    if (canvasClocks.hours) {
+        updateCanvasClock(time);
+    }
 
     updateProgress(now);
     updateCurrentTime();
@@ -148,11 +156,13 @@ function updateCurrentTime() {
 function displayNewYear() {
     document.body.classList.add('new-year-arrived');
 
-    // 更新倒计时显示
-    updateFlipUnit(elements.hours, 0, 'hours');
-    updateFlipUnit(elements.minutes, 0, 'minutes');
-    updateFlipUnit(elements.seconds, 0, 'seconds');
-    updateMilliseconds(elements.milliseconds, 0);
+    // 更新倒计时显示为00:00:00.000
+    if (canvasClocks.hours) {
+        canvasClocks.hours.setValue(0);
+        canvasClocks.minutes.setValue(0);
+        canvasClocks.seconds.setValue(0);
+        canvasClocks.milliseconds.setValue(0);
+    }
 
     elements.progress.style.width = '100%';
     elements.progressText.textContent = '2025年已过去 100%';
@@ -175,7 +185,7 @@ function displayNewYear() {
     }
 }
 
-// 烟花效果
+// 烟花效果（降级方案）
 function triggerFireworks() {
     const container = document.getElementById('particles');
 
@@ -224,6 +234,8 @@ document.head.appendChild(style);
 // 创建粒子
 function createParticles() {
     const container = document.getElementById('particles');
+    if (!container) return;
+
     const particleCount = 60;
 
     for (let i = 0; i < particleCount; i++) {
@@ -261,11 +273,46 @@ function animate(currentTime) {
     requestAnimationFrame(animate);
 }
 
+// 窗口大小改变时重新初始化Canvas
+let resizeTimeout;
+function handleResize() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        if (canvasClocks.hours) {
+            Object.values(canvasClocks).forEach(clock => {
+                if (clock && typeof clock.resize === 'function') {
+                    clock.resize();
+                }
+            });
+        }
+    }, 250);
+}
+
 // 初始化
 function init() {
+    console.log('🚀 初始化Canvas倒计时...');
+
+    // 初始化Canvas时钟
+    const success = initCanvasClocks();
+
+    if (!success) {
+        console.error('❌ Canvas时钟初始化失败，倒计时无法启动');
+        return;
+    }
+
+    // 创建背景粒子
     createParticles();
+
+    // 初始更新
     updateCountdown();
+
+    // 启动动画循环
     requestAnimationFrame(animate);
+
+    // 监听窗口大小变化
+    window.addEventListener('resize', handleResize);
+
+    console.log('✅ Canvas倒计时启动成功');
 }
 
 if (document.readyState === 'loading') {
@@ -277,10 +324,9 @@ if (document.readyState === 'loading') {
 // 页面可见性检测
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        console.log('Countdown paused');
+        console.log('⏸️ 倒计时暂停（页面隐藏）');
     } else {
-        console.log('Countdown resumed');
+        console.log('▶️ 倒计时恢复（页面可见）');
         updateCountdown();
     }
 });
-

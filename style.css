@@ -195,181 +195,22 @@ body {
     margin-bottom: 3rem;
 }
 
-/* ===== 翻页时钟样式 ===== */
-.flip-unit {
+/* ===== Canvas翻页时钟样式 ===== */
+.canvas-clock-wrapper {
     position: relative;
     width: clamp(90px, 12vw, 140px);
     height: clamp(120px, 15vw, 180px);
-    perspective: 400px;
 }
 
-.flip-unit.small {
-    width: clamp(120px, 15vw, 200px);
+.canvas-clock-wrapper.small {
+    width: clamp(70px, 10vw, 120px);
+    height: clamp(90px, 12vw, 150px);
 }
 
-.flip-card {
-    position: relative;
+.flip-clock-canvas {
     width: 100%;
     height: 100%;
-    font-size: clamp(3rem, 8vw, 7rem);
-    font-weight: bold;
-    line-height: 1;
-}
-
-.flip-unit.small .flip-card {
-    font-size: clamp(2rem, 5vw, 4rem);
-}
-
-.flip-card .top,
-.flip-card .bottom,
-.flip-card .top-next,
-.flip-card .bottom-next {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 50%;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(0, 245, 255, 0.4);
-    box-shadow:
-        0 8px 32px rgba(0, 245, 255, 0.2),
-        inset 0 0 30px rgba(0, 245, 255, 0.05);
-}
-
-.flip-card .top,
-.flip-card .top-next {
-    top: 0;
-    border-radius: 15px 15px 0 0;
-    border-bottom: 1px solid rgba(0, 245, 255, 0.3);
-}
-
-.flip-card .bottom,
-.flip-card .bottom-next {
-    bottom: 0;
-    border-radius: 0 0 15px 15px;
-    border-top: 1px solid rgba(0, 245, 255, 0.3);
-}
-
-.flip-card .top::after,
-.flip-card .top-next::after {
-    content: attr(data-value);
-    position: absolute;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    color: var(--accent-cyan);
-    text-shadow:
-        0 0 10px var(--accent-cyan),
-        0 0 20px var(--accent-cyan),
-        0 0 30px rgba(0, 245, 255, 0.5);
-    font-family: 'Courier New', monospace;
-    letter-spacing: 0.05em;
-}
-
-.flip-card .bottom::after,
-.flip-card .bottom-next::after {
-    content: attr(data-value);
-    position: absolute;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    color: var(--accent-cyan);
-    text-shadow:
-        0 0 10px var(--accent-cyan),
-        0 0 20px var(--accent-cyan),
-        0 0 30px rgba(0, 245, 255, 0.5);
-    font-family: 'Courier New', monospace;
-    letter-spacing: 0.05em;
-}
-
-.flip-card .top::after {
-    top: 0;
-    transform-origin: bottom;
-    height: 100%;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: 50%;
-}
-
-.flip-card .top-next::after {
-    top: 0;
-    transform-origin: bottom;
-    height: 100%;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: 50%;
-}
-
-.flip-card .bottom::after {
-    bottom: 0;
-    transform-origin: top;
-    height: 100%;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 50%;
-}
-
-.flip-card .bottom-next::after {
-    bottom: 0;
-    transform-origin: top;
-    height: 100%;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 50%;
-}
-
-.flip-card .top {
-    z-index: 3;
-}
-
-.flip-card .bottom {
-    z-index: 2;
-}
-
-.flip-card .top-next {
-    z-index: 1;
-    opacity: 0;
-}
-
-.flip-card .bottom-next {
-    z-index: 0;
-    opacity: 0;
-}
-
-/* 翻页动画 */
-.flip-card.flipping .top {
-    animation: flip-top 0.6s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
-}
-
-.flip-card.flipping .bottom-next {
-    animation: flip-bottom-next 0.6s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
-}
-
-@keyframes flip-top {
-    0% {
-        transform: rotateX(0deg);
-        opacity: 1;
-    }
-    100% {
-        transform: rotateX(-90deg);
-        opacity: 0;
-    }
-}
-
-@keyframes flip-bottom-next {
-    0% {
-        transform: rotateX(90deg);
-        opacity: 0;
-    }
-    100% {
-        transform: rotateX(0deg);
-        opacity: 1;
-    }
+    display: block;
 }
 
 .flip-divider {
@@ -379,9 +220,6 @@ body {
     text-shadow: 0 0 20px var(--accent-cyan);
     margin: 0 0.5rem;
     animation: pulse 2s ease-in-out infinite;
-}
-
-    margin: 0 auto 3rem;
 }
 
 .progress-bar {
@@ -493,21 +331,14 @@ body {
         gap: 0.6rem;
     }
 
-    .flip-unit {
+    .canvas-clock-wrapper {
         width: clamp(70px, 10vw, 110px);
         height: clamp(90px, 12vw, 140px);
     }
 
-    .flip-unit.small {
-        width: clamp(90px, 13vw, 150px);
-    }
-
-    .flip-card {
-        font-size: clamp(2rem, 6vw, 5rem);
-    }
-
-    .flip-unit.small .flip-card {
-        font-size: clamp(1.5rem, 4vw, 3rem);
+    .canvas-clock-wrapper.small {
+        width: clamp(55px, 9vw, 90px);
+        height: clamp(75px, 10vw, 115px);
     }
 
     .container {
@@ -529,21 +360,14 @@ body {
         flex-wrap: nowrap;
     }
 
-    .flip-unit {
+    .canvas-clock-wrapper {
         width: clamp(50px, 8vw, 80px);
         height: clamp(70px, 11vw, 110px);
     }
 
-    .flip-unit.small {
-        width: clamp(70px, 11vw, 120px);
-    }
-
-    .flip-card {
-        font-size: clamp(1.5rem, 5vw, 3.5rem);
-    }
-
-    .flip-unit.small .flip-card {
-        font-size: clamp(1rem, 3.5vw, 2.5rem);
+    .canvas-clock-wrapper.small {
+        width: clamp(40px, 7vw, 70px);
+        height: clamp(55px, 9vw, 90px);
     }
 
     .flip-divider {

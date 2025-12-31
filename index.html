@@ -19,6 +19,8 @@
         })();
     </script>
     <link rel="stylesheet" href="style.css">
+    <!-- Canvas翻页时钟库 -->
+    <script src="flip-clock-canvas.js?v=2026"></script>
     <script>
         // 动态加载JS，带时间戳
         window.addEventListener('DOMContentLoaded', function() {
@@ -50,48 +52,32 @@
             <div class="current-time-display" id="currentTimeDisplay">--:--:--</div>
         </div>
 
-        <!-- 倒计时主显示区 -->
+        <!-- 倒计时主显示区 - Canvas翻页时钟 -->
         <div class="countdown-container">
-            <div class="flip-unit" id="hours">
-                <div class="flip-card" data-current="00" data-next="00">
-                    <div class="top">00</div>
-                    <div class="bottom">00</div>
-                    <div class="top-next">00</div>
-                    <div class="bottom-next">00</div>
-                </div>
+            <!-- 小时 -->
+            <div class="canvas-clock-wrapper">
+                <canvas id="canvas-hours" class="flip-clock-canvas"></canvas>
             </div>
 
             <div class="flip-divider">:</div>
 
-            <div class="flip-unit" id="minutes">
-                <div class="flip-card" data-current="00" data-next="00">
-                    <div class="top">00</div>
-                    <div class="bottom">00</div>
-                    <div class="top-next">00</div>
-                    <div class="bottom-next">00</div>
-                </div>
+            <!-- 分钟 -->
+            <div class="canvas-clock-wrapper">
+                <canvas id="canvas-minutes" class="flip-clock-canvas"></canvas>
             </div>
 
             <div class="flip-divider">:</div>
 
-            <div class="flip-unit" id="seconds">
-                <div class="flip-card" data-current="00" data-next="00">
-                    <div class="top">00</div>
-                    <div class="bottom">00</div>
-                    <div class="top-next">00</div>
-                    <div class="bottom-next">00</div>
-                </div>
+            <!-- 秒 -->
+            <div class="canvas-clock-wrapper">
+                <canvas id="canvas-seconds" class="flip-clock-canvas"></canvas>
             </div>
 
             <div class="flip-divider">.</div>
 
-            <div class="flip-unit small" id="milliseconds">
-                <div class="flip-card" data-current="000" data-next="000">
-                    <div class="top">000</div>
-                    <div class="bottom">000</div>
-                    <div class="top-next">000</div>
-                    <div class="bottom-next">000</div>
-                </div>
+            <!-- 毫秒 -->
+            <div class="canvas-clock-wrapper small">
+                <canvas id="canvas-milliseconds" class="flip-clock-canvas"></canvas>
             </div>
         </div>
 
