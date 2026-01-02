@@ -304,8 +304,12 @@ const MusicPlayer = {
     switchToCelebration() {
         console.log('🎉 继续播放 China-E...');
         // 已经在播放 China-E，无需切换
-        if (!this.state.isPlaying && this.state.audioElement) {
-            this.state.audioElement.play();
+        // ✨ 不再尝试自动播放，避免 NotAllowedError
+        // 如果用户没有交互，音乐不会播放
+        if (!this.state.isPlaying && this.state.audioElement && this.state.userInteracted) {
+            this.state.audioElement.play().catch(e => {
+                console.warn('⚠️ 跨年时刻播放失败:', e.message);
+            });
         }
     }
 };
