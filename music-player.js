@@ -72,15 +72,11 @@ const MusicPlayer = {
         // ✨ 监听开始按钮的点击事件
         const button = document.getElementById('start-button');
         const prompt = document.getElementById('music-prompt');
-        const canvas = document.getElementById('firework-canvas');
 
-        if (!button || !prompt || !canvas) {
+        if (!button || !prompt) {
             console.warn('⚠️ 未找到必要的元素');
             return;
         }
-
-        // 初始化真实烟花效果
-        const firework = new RealisticFirework(canvas);
 
         const handleStart = async () => {
             if (this.state.userInteracted) return;
@@ -88,15 +84,18 @@ const MusicPlayer = {
 
             console.log('✅ 用户点击，发射烟花并播放音乐');
 
-            // 获取按钮位置
-            const rect = button.getBoundingClientRect();
-            const startX = rect.left + rect.width / 2;
-            const startY = rect.top + rect.height / 2;
+            // 初始化并启动烟花模拟器（如果还未初始化）
+            if (typeof initFireworks === 'function' && !window.fireworksInitialized) {
+                initFireworks();
+                window.fireworksInitialized = true;
+            }
 
-            // 发射烟花（从按钮位置升起）
-            firework.launch(startX, startY);
+            // 发射多枚烟花
+            if (typeof launchMultipleFireworks === 'function') {
+                launchMultipleFireworks(7); // 发射7枚烟花
+            }
 
-            // 延迟播放音乐（等待烟花升空和爆炸）
+            // 立即播放音乐
             setTimeout(async () => {
                 if (this.state.audioElement) {
                     try {
@@ -111,8 +110,8 @@ const MusicPlayer = {
                 // 延迟隐藏提示
                 setTimeout(() => {
                     prompt.classList.add('hidden');
-                }, 2000);
-            }, 800); // 等待烟花升起和爆炸
+                }, 3000);
+            }, 500);
         };
 
         button.addEventListener('click', handleStart);

@@ -20,10 +20,12 @@
     <link rel="stylesheet" href="style.css">
     <!-- Canvas翻页时钟库 -->
     <script src="flip-clock-canvas.js?v=2026"></script>
-    <!-- 烟花效果 -->
-    <script src="fireworks.js?v=2026"></script>
-    <!-- 烟花爆炸效果 -->
-    <script src="firework-explosion.js?v=2026"></script>
+    <!-- 烟花模拟器 - 数学工具 -->
+    <script src="my-math.js?v=2026"></script>
+    <!-- 烟花模拟器 - 核心系统 -->
+    <script src="fireworks-simulator.js?v=2026"></script>
+    <!-- 烟花模拟器 - 渲染引擎 -->
+    <script src="fireworks-renderer.js?v=2026"></script>
     <!-- 高级音乐播放器 -->
     <script src="music-player.js?v=2026"></script>
     <script>
@@ -38,8 +40,10 @@
 </head>
 <body>
     <!-- 音乐启动提示 -->
-    <div id="music-prompt" class="music-prompt">
-        <canvas id="firework-canvas" class="firework-canvas"></canvas>
+    <div id="music-prompt" class="music-prompt canvas-container">
+        <!-- 烟花模拟器双层 Canvas -->
+        <canvas id="trails-canvas" class="fireworks-canvas"></canvas>
+        <canvas id="main-canvas" class="fireworks-canvas"></canvas>
         <div class="prompt-content">
             <button id="start-button" class="start-button">
                 <span class="button-text">2026 蒸蚌</span>

@@ -28,7 +28,8 @@
     pointer-events: none;
 }
 
-.firework-canvas {
+/* 烟花模拟器双层 Canvas */
+.fireworks-canvas {
     position: absolute;
     top: 0;
     left: 0;
@@ -37,10 +38,18 @@
     pointer-events: none;
 }
 
+#trails-canvas {
+    z-index: 1; /* 尾迹层在下 */
+}
+
+#main-canvas {
+    z-index: 2; /* 主粒子层在上 */
+}
+
 .prompt-content {
     text-align: center;
     position: relative;
-    z-index: 1;
+    z-index: 10; /* 按钮在最上层 */
 }
 
 .start-button {
