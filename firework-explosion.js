@@ -26,12 +26,12 @@ class RealisticFirework {
      * 发射烟花
      */
     launch(startX, startY) {
-        // 发射 3-5 枚烟花火箭
-        const rocketCount = 3 + Math.floor(Math.random() * 3);
+        // 发射 5-7 枚烟花火箭
+        const rocketCount = 5 + Math.floor(Math.random() * 3);
         for (let i = 0; i < rocketCount; i++) {
-            const offsetX = (Math.random() - 0.5) * 150;
-            const targetY = this.height * 0.15 + Math.random() * 150;
-            this.rockets.push(new FireworkRocket(startX + offsetX, targetY, this));
+            const offsetX = (Math.random() - 0.5) * 200;
+            const targetY = this.height * 0.1 + Math.random() * 100;
+            this.rockets.push(new FireworkRocket(startX + offsetX, startY, targetY));
         }
 
         // 开始动画循环
@@ -48,18 +48,18 @@ class RealisticFirework {
         // 创建多层菊花型粒子
         const colors = this.getRandomColorScheme();
 
-        // 内层：30 个粒子，快速、明亮
-        for (let i = 0; i < 30; i++) {
+        // 内层：40 个粒子，快速、明亮
+        for (let i = 0; i < 40; i++) {
             this.particles.push(new ExplosionParticle(x, y, 'inner', colors.inner));
         }
 
-        // 中层：50 个粒子，中速、主要色彩
-        for (let i = 0; i < 50; i++) {
+        // 中层：60 个粒子，中速、主要色彩
+        for (let i = 0; i < 60; i++) {
             this.particles.push(new ExplosionParticle(x, y, 'middle', colors.middle));
         }
 
-        // 外层：70 个粒子，慢速、半透明
-        for (let i = 0; i < 70; i++) {
+        // 外层：80 个粒子，慢速、半透明
+        for (let i = 0; i < 80; i++) {
             this.particles.push(new ExplosionParticle(x, y, 'outer', colors.outer));
         }
     }
@@ -107,8 +107,8 @@ class RealisticFirework {
      * 动画循环
      */
     animate() {
-        // 半透明清除画布，创建拖尾效果
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+        // 完全清除画布（不保留拖尾，更真实）
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
         this.ctx.fillRect(0, 0, this.width, this.height);
 
         // 更新和绘制火箭
@@ -149,64 +149,71 @@ class RealisticFirework {
  * 烟花火箭（升起阶段）
  */
 class FireworkRocket {
-    constructor(x, targetY, firework) {
-        this.x = x;
-        this.y = window.innerHeight; // 从底部开始
+    constructor(startX, startY, targetY) {
+        this.x = startX;
+        this.y = startY;
         this.targetY = targetY;
-        this.firework = firework;
 
-        this.speed = 12 + Math.random() * 3;
-        this.angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.1; // 向上，略微倾斜
+        // 初始向上的速度
+        this.vy = -15 - Math.random() * 5; // 向上，快速
+        this.vx = (Math.random() - 0.5) * 2; // 轻微左右偏移
+
         this.trail = []; // 尾迹
-        this.trailLength = 15;
+        this.trailLength = 20;
         this.color = '#fff';
+
+        // 加速效果（模拟火箭推进）
+        this.acceleration = 0.3;
     }
 
     update() {
         // 记录尾迹
-        this.trail.push({ x: this.x, y: this.y, alpha: 1 });
+        this.trail.push({ x: this.x, y: this.y, alpha: 1, size: 3 });
         if (this.trail.length > this.trailLength) {
             this.trail.shift();
         }
 
-        // 更新尾迹透明度
+        // 更新尾迹透明度和大小
         this.trail.forEach((point, index) => {
-            point.alpha = (index / this.trail.length);
+            point.alpha = (index / this.trail.length) * 0.8;
+            point.size = (index / this.trail.length) * 3;
         });
 
-        // 更新位置
-        this.x += Math.cos(this.angle) * this.speed;
-        this.y += Math.sin(this.angle) * this.speed;
+        // 向上加速（模拟火箭推进）
+        this.vy -= this.acceleration;
 
-        // 速度递减（空气阻力）
-        this.speed *= 0.985;
+        // 应用速度
+        this.x += this.vx;
+        this.y += this.vy;
 
-        // 检查是否到达目标高度
-        return this.speed < 1.5 || this.y <= this.targetY;
+        // 空气阻力（逐渐减小横向速度）
+        this.vx *= 0.99;
+
+        // 检查是否到达目标高度或速度变为正数（开始下落）
+        return this.vy > 0 || this.y <= this.targetY;
     }
 
     draw(ctx) {
-        // 绘制尾迹
-        this.trail.forEach((point, index) => {
+        // 绘制尾迹（从大到小，从亮到暗）
+        this.trail.forEach((point) => {
             ctx.save();
-            ctx.globalAlpha = point.alpha * 0.8;
-            ctx.fillStyle = this.color;
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = '#fff';
-            const size = 2 + (index / this.trail.length) * 2;
+            ctx.globalAlpha = point.alpha;
+            ctx.fillStyle = point.color;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = point.color;
             ctx.beginPath();
-            ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+            ctx.arc(point.x, point.y, point.size, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         });
 
-        // 绘制火箭头部
+        // 绘制火箭头部（最亮）
         ctx.save();
         ctx.fillStyle = '#fff';
-        ctx.shadowBlur = 20;
+        ctx.shadowBlur = 25;
         ctx.shadowColor = '#fff';
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
     }
@@ -224,20 +231,20 @@ class ExplosionParticle {
 
         // 根据层次设置属性
         if (layer === 'inner') {
-            this.size = 2;
-            this.speed = 8 + Math.random() * 4;
-            this.decay = 0.025 + Math.random() * 0.01;
-            this.gravity = 0.15;
+            this.size = 2.5;
+            this.speed = 12 + Math.random() * 6; // 更快
+            this.decay = 0.018 + Math.random() * 0.01;
+            this.gravity = 0.08; // 较小重力
         } else if (layer === 'middle') {
-            this.size = 3;
-            this.speed = 5 + Math.random() * 3;
-            this.decay = 0.015 + Math.random() * 0.008;
+            this.size = 3.5;
+            this.speed = 7 + Math.random() * 4;
+            this.decay = 0.012 + Math.random() * 0.008;
             this.gravity = 0.12;
         } else {
-            this.size = 4;
-            this.speed = 3 + Math.random() * 2;
-            this.decay = 0.008 + Math.random() * 0.007;
-            this.gravity = 0.08;
+            this.size = 4.5;
+            this.speed = 4 + Math.random() * 3;
+            this.decay = 0.008 + Math.random() * 0.005;
+            this.gravity = 0.15;
         }
 
         // 菊花型：均匀分布的角度
@@ -247,22 +254,33 @@ class ExplosionParticle {
         this.alpha = 1;
 
         // 闪烁效果
-        this.twinkle = Math.random() > 0.6;
-        this.twinkleSpeed = 0.1 + Math.random() * 0.1;
+        this.twinkle = Math.random() > 0.5;
+        this.twinkleSpeed = 0.08 + Math.random() * 0.06;
         this.twinkleOffset = Math.random() * Math.PI * 2;
+
+        // 初始爆发速度
+        this.friction = 0.97; // 空气阻力
     }
 
     update() {
+        // 更新位置
         this.x += this.vx;
         this.y += this.vy;
+
+        // 应用重力
         this.vy += this.gravity;
-        this.vx *= 0.96;
-        this.vy *= 0.96;
+
+        // 应用空气阻力
+        this.vx *= this.friction;
+        this.vy *= this.friction;
+
+        // 淡出
         this.alpha -= this.decay;
 
-        // 闪烁效果
+        // 闪烁效果（部分粒子）
         if (this.twinkle) {
-            this.alpha += Math.sin(Date.now() * this.twinkleSpeed + this.twinkleOffset) * 0.15;
+            this.alpha += Math.sin(Date.now() * this.twinkleSpeed + this.twinkleOffset) * 0.12;
+            this.alpha = Math.max(0, Math.min(1, this.alpha)); // 限制范围
         }
     }
 
@@ -272,7 +290,16 @@ class ExplosionParticle {
         ctx.save();
         ctx.globalAlpha = displayAlpha;
         ctx.fillStyle = this.color;
-        ctx.shadowBlur = this.layer === 'inner' ? 20 : 15;
+
+        // 不同层次不同的发光效果
+        if (this.layer === 'inner') {
+            ctx.shadowBlur = 25; // 内层更亮
+        } else if (this.layer === 'middle') {
+            ctx.shadowBlur = 18;
+        } else {
+            ctx.shadowBlur = 12;
+        }
+
         ctx.shadowColor = this.color;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
