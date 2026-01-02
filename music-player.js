@@ -69,21 +69,45 @@ const MusicPlayer = {
      * 绑定事件
      */
     bindEvents() {
-        // 监听用户交互以触发播放
-        const handleInteraction = () => {
+        // ✨ 模拟用户交互以绕过自动播放限制
+        // 页面加载后立即触发
+        const simulateUserInteraction = () => {
             if (!this.state.userInteracted && this.state.audioElement) {
                 this.state.userInteracted = true;
+
+                // 创建并触发模拟点击事件
+                const clickEvent = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                });
+                document.body.dispatchEvent(clickEvent);
+
+                // 尝试播放
                 this.state.audioElement.play()
                     .then(() => {
                         this.state.isPlaying = true;
-                        console.log('✅ 用户交互后播放成功');
+                        console.log('✅ 模拟交互后播放成功');
                     })
-                    .catch(e => console.warn('播放失败:', e.message));
+                    .catch(e => {
+                        console.warn('模拟交互后仍失败，尝试其他方法:', e.message);
+                        // 尝试使用触摸事件
+                        const touchEvent = new TouchEvent('touchstart', {
+                            bubbles: true,
+                            cancelable: true,
+                            view: window
+                        });
+                        document.body.dispatchEvent(touchEvent);
+                    });
             }
         };
 
-        document.addEventListener('click', handleInteraction, { once: true });
-        document.addEventListener('touchstart', handleInteraction, { once: true });
+        // 页面加载完成后立即尝试模拟交互
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', simulateUserInteraction, { once: true });
+        } else {
+            simulateUserInteraction();
+        }
     },
 
     /**
