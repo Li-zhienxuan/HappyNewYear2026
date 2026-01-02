@@ -43,9 +43,9 @@ const MusicPlayer = {
         console.log('🎵 初始化音乐播放器（仅 China-E）...');
         this.state.filteredPlaylist = [...this.playlist];
         this.createUI();
-        this.bindEvents();
         this.initAudio();
         this.loadSong(0);
+        this.bindEvents(); // 在音频初始化后绑定事件
         this.tryAutoPlay();
     },
 
@@ -69,45 +69,59 @@ const MusicPlayer = {
      * 绑定事件
      */
     bindEvents() {
-        // ✨ 模拟用户交互以绕过自动播放限制
-        // 页面加载后立即触发
-        const simulateUserInteraction = () => {
-            if (!this.state.userInteracted && this.state.audioElement) {
-                this.state.userInteracted = true;
+        // ✨ 创建全屏透明覆盖层，首次点击时触发播放
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            cursor: pointer;
+            background: transparent;
+        `;
+        overlay.id = 'music-autoplay-overlay';
 
-                // 创建并触发模拟点击事件
-                const clickEvent = new MouseEvent('click', {
-                    bubbles: true,
-                    cancelable: true,
-                    view: window
-                });
-                document.body.dispatchEvent(clickEvent);
+        const handleFirstInteraction = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
 
-                // 尝试播放
+            if (this.state.userInteracted) return;
+            this.state.userInteracted = true;
+
+            console.log('✅ 检测到用户交互，开始播放音乐');
+
+            // 移除覆盖层
+            overlay.remove();
+
+            // 播放音乐
+            if (this.state.audioElement) {
                 this.state.audioElement.play()
                     .then(() => {
                         this.state.isPlaying = true;
-                        console.log('✅ 模拟交互后播放成功');
+                        console.log('✅ 音乐播放成功');
                     })
-                    .catch(e => {
-                        console.warn('模拟交互后仍失败，尝试其他方法:', e.message);
-                        // 尝试使用触摸事件
-                        const touchEvent = new TouchEvent('touchstart', {
-                            bubbles: true,
-                            cancelable: true,
-                            view: window
-                        });
-                        document.body.dispatchEvent(touchEvent);
+                    .catch(err => {
+                        console.warn('播放失败:', err.message);
                     });
             }
+
+            // 移除所有事件监听
+            document.removeEventListener('click', handleFirstInteraction, true);
+            document.removeEventListener('touchstart', handleFirstInteraction, true);
+            document.removeEventListener('keydown', handleFirstInteraction, true);
         };
 
-        // 页面加载完成后立即尝试模拟交互
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', simulateUserInteraction, { once: true });
-        } else {
-            simulateUserInteraction();
-        }
+        // 添加覆盖层到页面
+        document.body.appendChild(overlay);
+
+        // 监听首次交互（使用捕获阶段以确保优先触发）
+        document.addEventListener('click', handleFirstInteraction, true);
+        document.addEventListener('touchstart', handleFirstInteraction, true);
+        document.addEventListener('keydown', handleFirstInteraction, true);
+
+        console.log('⏳ 等待用户首次交互（点击/触摸/按键）后播放音乐...');
     },
 
     /**
