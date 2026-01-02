@@ -308,11 +308,13 @@ class FlipClock {
     }
 
     /**
-     * 更新值（带动画）
+     * 更新值（带动画）- 临时禁用动画以确认问题
      */
     update(newValue) {
         const paddedValue = newValue.toString().padStart(2, '0');
-        this.flipTo(paddedValue);
+        // 暂时使用无动画的更新
+        this.renderStatic(paddedValue);
+        this.currentValue = paddedValue;
     }
 
     /**
