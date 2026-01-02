@@ -6,17 +6,19 @@
 const NetEaseMusic = {
     // 音乐配置
     config: {
-        // 倒计时期间音乐：邓紫棋《倒数》
+        // 倒计时期间音乐：轻柔的背景音乐
         countdown: {
-            id: 1299550532,
-            url: 'https://music.163.com/song?id=1299550532&userid=1684524669',
-            name: '倒数 - G.E.M.邓紫棋'
+            id: 'countdown-calm',
+            // 使用 Pixabay 免版税音乐
+            url: 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_106f9f8e41.mp3', // Inspirational Piano
+            name: '倒计时音乐 - Inspirational Piano'
         },
-        // 跨年时刻音乐：China-E
+        // 跨年时刻音乐：欢快的庆祝音乐
         celebration: {
-            id: 2713923553,
-            url: 'https://music.163.com/song?id=2713923553&userid=1684524669',
-            name: 'China-E'
+            id: 'celebration-festive',
+            // 使用 Pixabay 免版税音乐
+            url: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3', // Auld Lang Syne
+            name: '友谊地久天长 - Auld Lang Syne'
         }
     },
 
@@ -108,7 +110,7 @@ const NetEaseMusic = {
         console.log('🎵 方案1：尝试自动播放...');
 
         const audio = new Audio();
-        audio.src = `https://music.163.com/song/media/outer/url?id=${this.config.countdown.id}.mp3`;
+        audio.src = this.config.countdown.url; // 直接使用配置的URL
         audio.loop = true;
         audio.volume = 0.5;
 
@@ -135,7 +137,7 @@ const NetEaseMusic = {
                 })
                 .catch((error) => {
                     console.warn('⚠️ 用户交互后仍失败:', error.message);
-                    this.tryIframe();
+                    this.updateUI(); // 显示手动播放按钮
                 });
         };
 
@@ -170,8 +172,9 @@ const NetEaseMusic = {
 
         // 监听播放错误
         audio.addEventListener('error', () => {
-            console.warn('⚠️ 方案1失败：音频加载错误');
-            this.tryIframe();
+            console.warn('⚠️ 音频加载错误，请检查网络连接');
+            this.state.method = 'fallback';
+            this.updateUI();
         });
     },
 
@@ -246,43 +249,48 @@ const NetEaseMusic = {
      * 切换到跨年音乐
      */
     switchToCelebration() {
-        console.log('🎉 切换到跨年音乐: China-E');
+        console.log('🎉 切换到跨年音乐:', this.config.celebration.name);
 
         if (this.state.method === 'auto' && this.state.audioElement) {
             const wasPlaying = this.state.isPlaying;
-            this.state.audioElement.src = `https://music.163.com/song/media/outer/url?id=${this.config.celebration.id}.mp3`;
-            this.state.audioElement.volume = 0;
+            const oldSrc = this.state.audioElement.src;
 
-            if (wasPlaying) {
-                this.state.audioElement.play();
-                // 淡入效果
-                const fadeIn = setInterval(() => {
-                    if (this.state.audioElement.volume < 0.5) {
-                        this.state.audioElement.volume += 0.05;
-                    } else {
-                        clearInterval(fadeIn);
-                    }
-                }, 200);
-            }
-        } else if (this.state.method === 'iframe') {
-            // 重新创建iframe
-            if (this.state.iframeElement) {
-                this.state.iframeElement.remove();
-            }
-            const iframe = document.createElement('iframe');
-            iframe.id = 'netease-music-iframe';
-            iframe.style.cssText = `
-                position: fixed;
-                bottom: -500px;
-                left: 10px;
-                width: 300px;
-                height: 400px;
-                border: none;
-                z-index: -1;
-            `;
-            iframe.src = `//music.163.com/outchain/player?type=2&id=${this.config.celebration.id}&auto=1&height=66`;
-            document.body.appendChild(iframe);
-            this.state.iframeElement = iframe;
+            // 创建新的音频元素以平滑切换
+            const newAudio = new Audio();
+            newAudio.src = this.config.celebration.url;
+            newAudio.loop = true;
+            newAudio.volume = 0;
+
+            newAudio.addEventListener('canplaythrough', () => {
+                if (wasPlaying) {
+                    newAudio.play();
+                    // 淡入效果
+                    const fadeIn = setInterval(() => {
+                        if (newAudio.volume < 0.5) {
+                            newAudio.volume += 0.05;
+                        } else {
+                            clearInterval(fadeIn);
+                            // 停止旧音频
+                            this.state.audioElement.pause();
+                        }
+                    }, 200);
+                }
+
+                // 更新音频元素引用
+                this.state.audioElement = newAudio;
+            });
+        } else {
+            // 如果没有播放，初始化新的音频
+            const audio = new Audio();
+            audio.src = this.config.celebration.url;
+            audio.loop = true;
+            audio.volume = 0.5;
+            this.state.audioElement = audio;
+
+            // 尝试播放
+            audio.play().catch(e => {
+                console.warn('⚠️ 跨年音乐自动播放失败:', e.message);
+            });
         }
 
         this.state.currentMode = 'celebration';

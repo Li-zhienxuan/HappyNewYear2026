@@ -264,10 +264,10 @@ class FlipClock {
             this.ctx.save();
             this.ctx.scale(1, scaleY);
             this.drawTopClip();
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'; // 翻转时半透明
-            this.ctx.fillRect(-100, -this.options.height/2, this.options.width + 200, this.options.height/2);
             this.drawText(this.currentValue);
             this.drawDivider();
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.25)'; // 翻转时半透明遮罩
+            this.ctx.fillRect(-100, -this.options.height/2, this.options.width + 200, this.options.height/2);
             this.ctx.restore();
 
             // 下半部分（保持旧数字）
@@ -295,9 +295,9 @@ class FlipClock {
             this.ctx.save();
             this.ctx.scale(1, scaleY);
             this.drawBottomClip();
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'; // 翻转时半透明
-            this.ctx.fillRect(-100, 0, this.options.width + 200, this.options.height/2);
             this.drawText(this.nextValue);
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.25)'; // 翻转时半透明遮罩
+            this.ctx.fillRect(-100, 0, this.options.width + 200, this.options.height/2);
             this.ctx.restore();
         }
 
