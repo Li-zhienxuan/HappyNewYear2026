@@ -226,6 +226,11 @@ class Shell {
      * 发射烟花
      */
     launch(position, launchHeight) {
+        if (!mainStage || !mainStage.width) {
+            console.warn('⚠️ Stage 未初始化，无法发射烟花');
+            return;
+        }
+
         const width = mainStage.width;
         const height = mainStage.height;
 

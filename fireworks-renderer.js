@@ -19,10 +19,16 @@ const SKY_LIGHT_NORMAL = 2;
 let simSpeed = 1;
 let currentFrame = 0;
 
-// 创建 Stage 实例
-const trailsStage = new Stage("trails-canvas");
-const mainStage = new Stage("main-canvas");
-const stages = [trailsStage, mainStage];
+// 创建 Stage 实例（延迟初始化）
+let trailsStage, mainStage, stages;
+
+function initStages() {
+    if (!trailsStage) {
+        trailsStage = new Stage("trails-canvas");
+        mainStage = new Stage("main-canvas");
+        stages = [trailsStage, mainStage];
+    }
+}
 
 // ===== 天空照亮效果 =====
 const currentSkyColor = { r: 0, g: 0, b: 0 };
@@ -301,6 +307,9 @@ function startAnimationLoop() {
 function initFireworks() {
     console.log('🎆 初始化烟花模拟器...');
 
+    // 先初始化 Stage
+    initStages();
+
     handleResize();
     window.addEventListener('resize', handleResize);
 
@@ -314,14 +323,22 @@ function initFireworks() {
 
 // ===== 发射烟花 =====
 function launchFirework() {
+    console.log('🚀 发射烟花...');
     const shell = new Shell(crysanthemumShell(3)); // size = 3
     const x = 0.3 + Math.random() * 0.4; // 屏幕中间 30%-70% 区域
     const y = 0.3 + Math.random() * 0.4;
     shell.launch(x, y);
+    console.log('✅ 烟花已发射');
 }
 
 // ===== 发射多枚烟花 =====
 function launchMultipleFireworks(count = 5) {
+    // 确保系统已初始化
+    if (!trailsStage || !mainStage) {
+        console.warn('⚠️ 烟花系统未初始化，先初始化...');
+        initFireworks();
+    }
+
     for (let i = 0; i < count; i++) {
         setTimeout(() => {
             launchFirework();
