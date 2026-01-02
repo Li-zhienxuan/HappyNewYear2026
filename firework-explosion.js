@@ -1,13 +1,14 @@
 /**
- * 烟花爆炸效果 - 真实粒子物理模拟
+ * 真实烟花升起 + 菊花型爆炸效果
+ * 参考：真实烟花物理模拟
  */
 
-class FireworkExplosion {
+class RealisticFirework {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
-        this.particles = [];
-        this.isActive = false;
+        this.rockets = []; // 烟花火箭（升起阶段）
+        this.particles = []; // 爆炸粒子
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
@@ -22,133 +23,263 @@ class FireworkExplosion {
     }
 
     /**
-     * 创建爆炸效果
+     * 发射烟花
      */
-    explode(x, y) {
-        const particleCount = 150;
-        const colors = [
-            '#ff0040', '#ff0080', '#ff00bf', '#ff00ff',
-            '#8000ff', '#4000ff', '#0040ff', '#0080ff',
-            '#00ffff', '#00ff80', '#00ff40', '#80ff00',
-            '#ffff00', '#ff8000', '#ff4000', '#ffffff'
-        ];
-
-        // 创建多个爆炸点
-        for (let i = 0; i < 3; i++) {
-            const offsetX = (Math.random() - 0.5) * 100;
-            const offsetY = (Math.random() - 0.5) * 100;
-            this.createExplosion(x + offsetX, y + offsetY, particleCount, colors);
+    launch(startX, startY) {
+        // 发射 3-5 枚烟花火箭
+        const rocketCount = 3 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < rocketCount; i++) {
+            const offsetX = (Math.random() - 0.5) * 150;
+            const targetY = this.height * 0.15 + Math.random() * 150;
+            this.rockets.push(new FireworkRocket(startX + offsetX, targetY, this));
         }
 
-        if (!this.isActive) {
-            this.isActive = true;
+        // 开始动画循环
+        if (!this.isAnimating) {
+            this.isAnimating = true;
             this.animate();
         }
     }
 
     /**
-     * 创建单个爆炸
+     * 爆炸烟花
      */
-    createExplosion(x, y, count, colors) {
-        for (let i = 0; i < count; i++) {
-            const angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
-            const velocity = 5 + Math.random() * 10;
-            const color = colors[Math.floor(Math.random() * colors.length)];
+    explode(x, y) {
+        // 创建多层菊花型粒子
+        const colors = this.getRandomColorScheme();
 
-            this.particles.push({
-                x: x,
-                y: y,
-                vx: Math.cos(angle) * velocity,
-                vy: Math.sin(angle) * velocity,
-                alpha: 1,
-                color: color,
-                size: 2 + Math.random() * 3,
-                decay: 0.015 + Math.random() * 0.01,
-                gravity: 0.15
-            });
+        // 内层：30 个粒子，快速、明亮
+        for (let i = 0; i < 30; i++) {
+            this.particles.push(new ExplosionParticle(x, y, 'inner', colors.inner));
         }
+
+        // 中层：50 个粒子，中速、主要色彩
+        for (let i = 0; i < 50; i++) {
+            this.particles.push(new ExplosionParticle(x, y, 'middle', colors.middle));
+        }
+
+        // 外层：70 个粒子，慢速、半透明
+        for (let i = 0; i < 70; i++) {
+            this.particles.push(new ExplosionParticle(x, y, 'outer', colors.outer));
+        }
+    }
+
+    /**
+     * 获取随机颜色方案
+     */
+    getRandomColorScheme() {
+        const schemes = [
+            {
+                inner: '#ffffff',
+                middle: '#ff6b6b',
+                outer: '#ee5a24'
+            },
+            {
+                inner: '#ffffff',
+                middle: '#ffd93d',
+                outer: '#ff9f43'
+            },
+            {
+                inner: '#ffffff',
+                middle: '#a55eea',
+                outer: '#8854d0'
+            },
+            {
+                inner: '#ffffff',
+                middle: '#26de81',
+                outer: '#20bf6b'
+            },
+            {
+                inner: '#ffffff',
+                middle: '#fd79a8',
+                outer: '#e84393'
+            },
+            {
+                inner: '#ffffff',
+                middle: '#ffeaa7',
+                outer: '#fdcb6e'
+            }
+        ];
+        return schemes[Math.floor(Math.random() * schemes.length)];
     }
 
     /**
      * 动画循环
      */
     animate() {
-        if (!this.isActive && this.particles.length === 0) {
-            this.ctx.clearRect(0, 0, this.width, this.height);
-            return;
-        }
-
-        // 使用半透明背景创建拖尾效果
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+        // 半透明清除画布，创建拖尾效果
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
         this.ctx.fillRect(0, 0, this.width, this.height);
+
+        // 更新和绘制火箭
+        for (let i = this.rockets.length - 1; i >= 0; i--) {
+            const rocket = this.rockets[i];
+            const shouldExplode = rocket.update();
+            rocket.draw(this.ctx);
+
+            if (shouldExplode) {
+                // 火箭到达目标高度，爆炸
+                this.explode(rocket.x, rocket.y);
+                this.rockets.splice(i, 1);
+            }
+        }
 
         // 更新和绘制粒子
         for (let i = this.particles.length - 1; i >= 0; i--) {
-            const p = this.particles[i];
-
-            // 更新位置
-            p.x += p.vx;
-            p.y += p.vy;
-            p.vy += p.gravity;
-            p.vx *= 0.98;
-            p.vy *= 0.98;
-            p.alpha -= p.decay;
-
-            // 绘制粒子
-            this.ctx.save();
-            this.ctx.globalAlpha = p.alpha;
-            this.ctx.fillStyle = p.color;
-            this.ctx.shadowBlur = 10;
-            this.ctx.shadowColor = p.color;
-            this.ctx.beginPath();
-            this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            this.ctx.fill();
-            this.ctx.restore();
+            const particle = this.particles[i];
+            particle.update();
+            particle.draw(this.ctx);
 
             // 移除消失的粒子
-            if (p.alpha <= 0) {
+            if (particle.alpha <= 0) {
                 this.particles.splice(i, 1);
             }
         }
 
-        // 检查是否还有粒子
-        if (this.particles.length > 0) {
+        // 检查是否还有活动
+        if (this.rockets.length > 0 || this.particles.length > 0) {
             requestAnimationFrame(() => this.animate());
         } else {
-            this.isActive = false;
+            this.isAnimating = false;
+        }
+    }
+}
+
+/**
+ * 烟花火箭（升起阶段）
+ */
+class FireworkRocket {
+    constructor(x, targetY, firework) {
+        this.x = x;
+        this.y = window.innerHeight; // 从底部开始
+        this.targetY = targetY;
+        this.firework = firework;
+
+        this.speed = 12 + Math.random() * 3;
+        this.angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.1; // 向上，略微倾斜
+        this.trail = []; // 尾迹
+        this.trailLength = 15;
+        this.color = '#fff';
+    }
+
+    update() {
+        // 记录尾迹
+        this.trail.push({ x: this.x, y: this.y, alpha: 1 });
+        if (this.trail.length > this.trailLength) {
+            this.trail.shift();
+        }
+
+        // 更新尾迹透明度
+        this.trail.forEach((point, index) => {
+            point.alpha = (index / this.trail.length);
+        });
+
+        // 更新位置
+        this.x += Math.cos(this.angle) * this.speed;
+        this.y += Math.sin(this.angle) * this.speed;
+
+        // 速度递减（空气阻力）
+        this.speed *= 0.985;
+
+        // 检查是否到达目标高度
+        return this.speed < 1.5 || this.y <= this.targetY;
+    }
+
+    draw(ctx) {
+        // 绘制尾迹
+        this.trail.forEach((point, index) => {
+            ctx.save();
+            ctx.globalAlpha = point.alpha * 0.8;
+            ctx.fillStyle = this.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#fff';
+            const size = 2 + (index / this.trail.length) * 2;
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        });
+
+        // 绘制火箭头部
+        ctx.save();
+        ctx.fillStyle = '#fff';
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = '#fff';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+/**
+ * 爆炸粒子（菊花型）
+ */
+class ExplosionParticle {
+    constructor(x, y, layer, color) {
+        this.x = x;
+        this.y = y;
+        this.layer = layer; // 'inner', 'middle', 'outer'
+        this.color = color;
+
+        // 根据层次设置属性
+        if (layer === 'inner') {
+            this.size = 2;
+            this.speed = 8 + Math.random() * 4;
+            this.decay = 0.025 + Math.random() * 0.01;
+            this.gravity = 0.15;
+        } else if (layer === 'middle') {
+            this.size = 3;
+            this.speed = 5 + Math.random() * 3;
+            this.decay = 0.015 + Math.random() * 0.008;
+            this.gravity = 0.12;
+        } else {
+            this.size = 4;
+            this.speed = 3 + Math.random() * 2;
+            this.decay = 0.008 + Math.random() * 0.007;
+            this.gravity = 0.08;
+        }
+
+        // 菊花型：均匀分布的角度
+        this.angle = Math.random() * Math.PI * 2;
+        this.vx = Math.cos(this.angle) * this.speed;
+        this.vy = Math.sin(this.angle) * this.speed;
+        this.alpha = 1;
+
+        // 闪烁效果
+        this.twinkle = Math.random() > 0.6;
+        this.twinkleSpeed = 0.1 + Math.random() * 0.1;
+        this.twinkleOffset = Math.random() * Math.PI * 2;
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += this.gravity;
+        this.vx *= 0.96;
+        this.vy *= 0.96;
+        this.alpha -= this.decay;
+
+        // 闪烁效果
+        if (this.twinkle) {
+            this.alpha += Math.sin(Date.now() * this.twinkleSpeed + this.twinkleOffset) * 0.15;
         }
     }
 
-    /**
-     * 触发连续爆炸（用于按钮点击）
-     */
-    burst(x, y) {
-        // 立即爆炸一次
-        this.explode(x, y);
+    draw(ctx) {
+        const displayAlpha = Math.max(0, Math.min(1, this.alpha));
 
-        // 后续自动触发几次
-        let count = 0;
-        const maxBursts = 5;
-        const interval = setInterval(() => {
-            const burstX = this.width * 0.2 + Math.random() * this.width * 0.6;
-            const burstY = this.height * 0.2 + Math.random() * this.height * 0.6;
-            this.explode(burstX, burstY);
-            count++;
-
-            if (count >= maxBursts) {
-                clearInterval(interval);
-            }
-        }, 200);
-    }
-
-    /**
-     * 清除所有粒子
-     */
-    clear() {
-        this.particles = [];
-        this.ctx.clearRect(0, 0, this.width, this.height);
+        ctx.save();
+        ctx.globalAlpha = displayAlpha;
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = this.layer === 'inner' ? 20 : 15;
+        ctx.shadowColor = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
     }
 }
 
 // 导出到全局
-window.FireworkExplosion = FireworkExplosion;
+window.RealisticFirework = RealisticFirework;

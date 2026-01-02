@@ -79,26 +79,25 @@ const MusicPlayer = {
             return;
         }
 
-        // 初始化烟花爆炸效果
-        const firework = new FireworkExplosion(canvas);
+        // 初始化真实烟花效果
+        const firework = new RealisticFirework(canvas);
 
-        const handleStart = async (event) => {
+        const handleStart = async () => {
             if (this.state.userInteracted) return;
             this.state.userInteracted = true;
 
-            console.log('✅ 用户点击，开始播放音乐并放烟花');
+            console.log('✅ 用户点击，发射烟花并播放音乐');
 
-            // 获取点击位置
+            // 获取按钮位置
             const rect = button.getBoundingClientRect();
-            const x = rect.left + rect.width / 2;
-            const y = rect.top + rect.height / 2;
+            const startX = rect.left + rect.width / 2;
+            const startY = rect.top + rect.height / 2;
 
-            // 触发烟花爆炸
-            firework.burst(x, y);
+            // 发射烟花（从按钮位置升起）
+            firework.launch(startX, startY);
 
-            // 延迟一点时间播放音乐，让烟花先炸开
+            // 延迟播放音乐（等待烟花升空和爆炸）
             setTimeout(async () => {
-                // 播放音乐
                 if (this.state.audioElement) {
                     try {
                         await this.state.audioElement.play();
@@ -109,26 +108,25 @@ const MusicPlayer = {
                     }
                 }
 
-                // 延迟隐藏提示，让用户看到烟花效果
+                // 延迟隐藏提示
                 setTimeout(() => {
                     prompt.classList.add('hidden');
-                }, 1500);
-            }, 300);
+                }, 2000);
+            }, 800); // 等待烟花升起和爆炸
         };
 
-        // 点击按钮开始
         button.addEventListener('click', handleStart);
 
         // 也支持按空格键开始
         const handleKeyPress = (e) => {
             if (e.code === 'Space' && !this.state.userInteracted) {
                 e.preventDefault();
-                handleStart(e);
+                handleStart();
             }
         };
         document.addEventListener('keydown', handleKeyPress);
 
-        console.log('⏳ 等待用户点击按钮开始播放音乐...');
+        console.log('⏳ 等待用户点击"2026 蒸蚌"按钮...');
     },
 
     /**
