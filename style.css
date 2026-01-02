@@ -117,6 +117,21 @@ body {
     letter-spacing: 0.1em;
 }
 
+/* 页脚链接样式 */
+.footer-link {
+    color: #9B59B6; /* 紫色 */
+    font-weight: 700; /* 加粗 */
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.footer-link:hover {
+    color: #BB8FCE; /* 淡紫色 */
+    border-bottom-color: #BB8FCE; /* 悬停时显示下划线 */
+    text-shadow: 0 0 10px rgba(155, 89, 182, 0.5); /* 紫色光晕 */
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
     .container {
