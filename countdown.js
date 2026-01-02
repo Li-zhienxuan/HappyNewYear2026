@@ -6,6 +6,7 @@ const START_DATE = new Date('2025-01-01T00:00:00').getTime();
 
 // Canvas时钟实例
 let clocks = {
+    hours: null,
     minutes: null,
     seconds: null,
     milliseconds: null
@@ -18,6 +19,7 @@ const elements = {
 
 // 上一次的值
 let previousValues = {
+    hours: -1,
     minutes: -1,
     seconds: '-1', // ✨ 使用字符串格式以匹配比较逻辑
     milliseconds: -1
@@ -39,6 +41,7 @@ function initClocks() {
     }
 
     try {
+        clocks.hours = new FlipClock('canvas-hours');
         clocks.minutes = new FlipClock('canvas-minutes');
         clocks.seconds = new FlipClock('canvas-seconds');
         clocks.milliseconds = new FlipClock('canvas-milliseconds');
@@ -73,13 +76,20 @@ function updateCountdown() {
         return;
     }
 
-    // 计算分、秒、毫秒
+    // 计算时、分、秒、毫秒
+    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((difference % (1000 * 60)) / 1000);
     const milliseconds = difference % 1000;
 
     // 更新时钟显示
-    if (clocks.minutes) {
+    if (clocks.hours) {
+        // 小时：只在值改变时翻页
+        if (hours !== previousValues.hours) {
+            clocks.hours.update(hours);
+            previousValues.hours = hours;
+        }
+
         // 分钟：只在值改变时翻页
         if (minutes !== previousValues.minutes) {
             clocks.minutes.update(minutes);
@@ -107,13 +117,20 @@ function updateForwardTimer() {
     const now = Date.now();
     const elapsed = now - TARGET_DATE;
 
-    // 计算分、秒、毫秒
+    // 计算时、分、秒、毫秒
+    const hours = Math.floor((elapsed % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((elapsed % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
     const milliseconds = elapsed % 1000;
 
     // 更新时钟显示
-    if (clocks.minutes) {
+    if (clocks.hours) {
+        // 小时：只在值改变时翻页
+        if (hours !== previousValues.hours) {
+            clocks.hours.update(hours);
+            previousValues.hours = hours;
+        }
+
         // 分钟：只在值改变时翻页
         if (minutes !== previousValues.minutes) {
             clocks.minutes.update(minutes);

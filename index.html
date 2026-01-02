@@ -60,6 +60,13 @@
 
         <!-- 倒计时显示区 - Canvas翻页时钟 -->
         <div class="countdown-wrapper">
+            <!-- 小时 -->
+            <div class="clock-unit">
+                <canvas id="canvas-hours" class="flip-canvas"></canvas>
+            </div>
+
+            <span class="divider">:</span>
+
             <!-- 分钟 -->
             <div class="clock-unit">
                 <canvas id="canvas-minutes" class="flip-canvas"></canvas>
@@ -74,8 +81,8 @@
 
             <span class="divider">:</span>
 
-            <!-- 毫秒 -->
-            <div class="clock-unit">
+            <!-- 毫秒（缩小显示） -->
+            <div class="clock-unit clock-unit-small">
                 <canvas id="canvas-milliseconds" class="flip-canvas"></canvas>
             </div>
         </div>
