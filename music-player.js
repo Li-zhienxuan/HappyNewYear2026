@@ -69,71 +69,48 @@ const MusicPlayer = {
      * 绑定事件
      */
     bindEvents() {
-        // ✨ 使用 iframe 嵌入 audio 元素来绕过自动播放限制
-        const autoPlayViaIframe = () => {
+        // ✨ 监听音乐启动提示的点击事件
+        const prompt = document.getElementById('music-prompt');
+        if (!prompt) {
+            console.warn('⚠️ 未找到音乐启动提示元素');
+            return;
+        }
+
+        const startMusic = async () => {
             if (this.state.userInteracted) return;
             this.state.userInteracted = true;
 
-            console.log('🤖 使用 iframe 方法尝试自动播放...');
+            console.log('✅ 用户点击，开始播放音乐');
 
-            try {
-                // 创建一个隐藏的 iframe
-                const iframe = document.createElement('iframe');
-                iframe.style.cssText = `
-                    position: fixed;
-                    top: -9999px;
-                    left: -9999px;
-                    width: 1px;
-                    height: 1px;
-                    border: none;
-                `;
-                iframe.allow = 'autoplay';
+            // 隐藏提示
+            prompt.classList.add('hidden');
 
-                // 在 iframe 中创建 audio 元素
-                const audioHtml = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head></head>
-                    <body>
-                        <audio id="bgm" loop autoplay style="display:none">
-                            <source src="${this.playlist[0].url}" type="audio/mpeg">
-                        </audio>
-                        <script>
-                            const audio = document.getElementById('bgm');
-                            audio.volume = 0.3;
-                            audio.play().catch(e => console.log('Iframe play failed:', e));
-                            window.parent.postMessage({type: 'audio-ready'}, '*');
-                        <\/script>
-                    </body>
-                    </html>
-                `;
-
-                document.body.appendChild(iframe);
-                iframe.srcdoc = audioHtml;
-
-                // 监听 iframe 消息
-                const messageHandler = (event) => {
-                    if (event.data && event.data.type === 'audio-ready') {
-                        console.log('✅ iframe 音频已加载');
-                        this.state.isPlaying = true;
-                        window.removeEventListener('message', messageHandler);
-                    }
-                };
-                window.addEventListener('message', messageHandler);
-
-                console.log('✅ iframe 已创建，等待音频播放...');
-                return;
-            } catch (e) {
-                console.warn('⚠️ iframe 方法失败:', e.message);
+            // 播放音乐
+            if (this.state.audioElement) {
+                try {
+                    await this.state.audioElement.play();
+                    this.state.isPlaying = true;
+                    console.log('✅ 音乐播放成功');
+                } catch (e) {
+                    console.warn('⚠️ 音乐播放失败:', e.message);
+                }
             }
         };
 
-        // 页面加载完成后立即尝试
-        if (document.readyState === 'loading') {
-            window.addEventListener('DOMContentLoaded', autoPlayViaIframe, { once: true });
-        } else {
-            setTimeout(autoPlayViaIframe, 100);
-        }
+        // 点击提示或按任意键开始
+        prompt.addEventListener('click', startMusic);
+        prompt.addEventListener('touchstart', startMusic);
+
+        // 也支持按空格键开始
+        const handleKeyPress = (e) => {
+            if (e.code === 'Space' && !this.state.userInteracted) {
+                e.preventDefault();
+                startMusic();
+            }
+        };
+        document.addEventListener('keydown', handleKeyPress);
+
+        console.log('⏳ 等待用户点击提示开始播放音乐...');
     },
 
     /**
