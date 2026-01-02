@@ -69,59 +69,78 @@ const MusicPlayer = {
      * 绑定事件
      */
     bindEvents() {
-        // ✨ 创建全屏透明覆盖层，首次点击时触发播放
-        const overlay = document.createElement('div');
-        overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 9999;
-            cursor: pointer;
-            background: transparent;
-        `;
-        overlay.id = 'music-autoplay-overlay';
-
-        const handleFirstInteraction = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (this.state.userInteracted) return;
+        // ✨ 自动触发播放，无需用户交互
+        const autoPlay = async () => {
+            if (this.state.userInteracted || !this.state.audioElement) return;
             this.state.userInteracted = true;
 
-            console.log('✅ 检测到用户交互，开始播放音乐');
+            console.log('🤖 尝试自动播放音乐...');
 
-            // 移除覆盖层
-            overlay.remove();
-
-            // 播放音乐
-            if (this.state.audioElement) {
-                this.state.audioElement.play()
-                    .then(() => {
-                        this.state.isPlaying = true;
-                        console.log('✅ 音乐播放成功');
-                    })
-                    .catch(err => {
-                        console.warn('播放失败:', err.message);
-                    });
+            // 方法1：直接播放
+            try {
+                await this.state.audioElement.play();
+                this.state.isPlaying = true;
+                console.log('✅ 自动播放成功！');
+                return;
+            } catch (e) {
+                console.log('⚠️ 直接播放失败，尝试模拟交互...');
             }
 
-            // 移除所有事件监听
-            document.removeEventListener('click', handleFirstInteraction, true);
-            document.removeEventListener('touchstart', handleFirstInteraction, true);
-            document.removeEventListener('keydown', handleFirstInteraction, true);
+            // 方法2：模拟点击 body
+            try {
+                document.body.click();
+                await new Promise(r => setTimeout(r, 100));
+                await this.state.audioElement.play();
+                this.state.isPlaying = true;
+                console.log('✅ 模拟点击成功！');
+                return;
+            } catch (e) {
+                console.log('⚠️ 模拟点击失败，尝试创建交互元素...');
+            }
+
+            // 方法3：创建并点击临时按钮
+            try {
+                const btn = document.createElement('button');
+                btn.style.cssText = 'position:fixed;top:-999px;left:-999px;';
+                document.body.appendChild(btn);
+                btn.click();
+                await new Promise(r => setTimeout(r, 100));
+                await this.state.audioElement.play();
+                this.state.isPlaying = true;
+                console.log('✅ 通过临时按钮触发成功！');
+                btn.remove();
+                return;
+            } catch (e) {
+                console.log('⚠️ 临时按钮方法失败，尝试键盘事件...');
+            }
+
+            // 方法4：触发键盘事件
+            try {
+                const keyEvent = new KeyboardEvent('keydown', {
+                    key: 'Enter',
+                    code: 'Enter',
+                    keyCode: 13,
+                    bubbles: true,
+                    cancelable: true
+                });
+                document.dispatchEvent(keyEvent);
+                await new Promise(r => setTimeout(r, 100));
+                await this.state.audioElement.play();
+                this.state.isPlaying = true;
+                console.log('✅ 键盘事件触发成功！');
+                return;
+            } catch (e) {
+                console.warn('❌ 所有可能的自动播放方法都已尝试，需要真实用户交互');
+            }
         };
 
-        // 添加覆盖层到页面
-        document.body.appendChild(overlay);
-
-        // 监听首次交互（使用捕获阶段以确保优先触发）
-        document.addEventListener('click', handleFirstInteraction, true);
-        document.addEventListener('touchstart', handleFirstInteraction, true);
-        document.addEventListener('keydown', handleFirstInteraction, true);
-
-        console.log('⏳ 等待用户首次交互（点击/触摸/按键）后播放音乐...');
+        // 页面加载完成后立即尝试
+        if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', autoPlay, { once: true });
+        } else {
+            // 延迟一小段时间确保音频已加载
+            setTimeout(autoPlay, 500);
+        }
     },
 
     /**
