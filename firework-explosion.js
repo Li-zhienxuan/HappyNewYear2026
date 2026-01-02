@@ -1,6 +1,6 @@
 /**
  * 真实烟花升起 + 菊花型爆炸效果
- * 参考：真实烟花物理模拟
+ * 参考：NianBroken/Firework_Simulator + 真实烟花物理模拟
  */
 
 class RealisticFirework {
@@ -8,7 +8,9 @@ class RealisticFirework {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.rockets = []; // 烟花火箭（升起阶段）
-        this.particles = []; // 爆炸粒子
+        this.stars = []; // 爆炸星花（主粒子）
+        this.sparks = []; // 火花（小粒子）
+        this.burstFlashes = []; // 爆炸闪光
 
         this.resize();
         window.addEventListener('resize', () => this.resize());
@@ -42,26 +44,53 @@ class RealisticFirework {
     }
 
     /**
-     * 爆炸烟花
+     * 爆炸烟花 - 使用球形粒子分布算法
      */
     explode(x, y) {
-        // 创建多层菊花型粒子
         const colors = this.getRandomColorScheme();
+        const starCount = 180; // 总星花数
 
-        // 内层：40 个粒子，快速、明亮
-        for (let i = 0; i < 40; i++) {
-            this.particles.push(new ExplosionParticle(x, y, 'inner', colors.inner));
+        // 使用球形分布算法（参考 createBurst 函数）
+        const R = 0.5 * Math.sqrt(starCount / Math.PI);
+        const C = 2 * R * Math.PI;
+        const C_HALF = C / 2;
+
+        for (let i = 0; i <= C_HALF; i++) {
+            const ringAngle = (i / C_HALF) * (Math.PI / 2);
+            const ringSize = Math.cos(ringAngle);
+            const partsPerFullRing = C * ringSize;
+            const angleInc = (Math.PI * 2) / partsPerFullRing;
+            const angleOffset = Math.random() * angleInc;
+
+            for (let j = 0; j < partsPerFullRing; j++) {
+                const randomAngleOffset = Math.random() * angleInc * 0.33;
+                const angle = angleInc * j + angleOffset + randomAngleOffset;
+
+                // 根据距离中心的位置决定层次
+                const distance = ringSize; // 0-1
+                let layer, color;
+                if (distance > 0.8) {
+                    layer = 'outer';
+                    color = colors.outer;
+                } else if (distance > 0.4) {
+                    layer = 'middle';
+                    color = colors.middle;
+                } else {
+                    layer = 'inner';
+                    color = colors.inner;
+                }
+
+                this.stars.push(new Star(x, y, angle, ringSize, color, layer));
+            }
         }
 
-        // 中层：60 个粒子，中速、主要色彩
-        for (let i = 0; i < 60; i++) {
-            this.particles.push(new ExplosionParticle(x, y, 'middle', colors.middle));
-        }
-
-        // 外层：80 个粒子，慢速、半透明
-        for (let i = 0; i < 80; i++) {
-            this.particles.push(new ExplosionParticle(x, y, 'outer', colors.outer));
-        }
+        // 添加爆炸闪光效果
+        this.burstFlashes.push({
+            x: x,
+            y: y,
+            radius: 150,
+            alpha: 1
+        });
     }
 
     /**
@@ -107,9 +136,19 @@ class RealisticFirework {
      * 动画循环
      */
     animate() {
-        // 使用半透明黑色清除，制造长拖尾效果
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+        // 使用更透明的方式清除，制造更长拖尾效果
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
         this.ctx.fillRect(0, 0, this.width, this.height);
+
+        // 绘制爆炸闪光（在底层）
+        for (let i = this.burstFlashes.length - 1; i >= 0; i--) {
+            const flash = this.burstFlashes[i];
+            this.drawBurstFlash(flash);
+            flash.alpha -= 0.08;
+            if (flash.alpha <= 0) {
+                this.burstFlashes.splice(i, 1);
+            }
+        }
 
         // 更新和绘制火箭
         for (let i = this.rockets.length - 1; i >= 0; i--) {
@@ -118,30 +157,63 @@ class RealisticFirework {
             rocket.draw(this.ctx);
 
             if (shouldExplode) {
-                // 火箭到达目标高度，爆炸
                 this.explode(rocket.x, rocket.y);
                 this.rockets.splice(i, 1);
             }
         }
 
-        // 更新和绘制粒子
-        for (let i = this.particles.length - 1; i >= 0; i--) {
-            const particle = this.particles[i];
-            particle.update();
-            particle.draw(this.ctx);
+        // 更新和绘制星花
+        for (let i = this.stars.length - 1; i >= 0; i--) {
+            const star = this.stars[i];
+            star.update(this);
+            star.draw(this.ctx);
 
-            // 移除消失的粒子
-            if (particle.alpha <= 0) {
-                this.particles.splice(i, 1);
+            // 移除消失的星花
+            if (star.alpha <= 0) {
+                this.stars.splice(i, 1);
+            }
+        }
+
+        // 更新和绘制火花
+        for (let i = this.sparks.length - 1; i >= 0; i--) {
+            const spark = this.sparks[i];
+            spark.update();
+            spark.draw(this.ctx);
+
+            // 移除消失的火花
+            if (spark.alpha <= 0) {
+                this.sparks.splice(i, 1);
             }
         }
 
         // 检查是否还有活动
-        if (this.rockets.length > 0 || this.particles.length > 0) {
+        if (this.rockets.length > 0 || this.stars.length > 0 || this.sparks.length > 0 || this.burstFlashes.length > 0) {
             requestAnimationFrame(() => this.animate());
         } else {
             this.isAnimating = false;
         }
+    }
+
+    /**
+     * 绘制爆炸闪光
+     */
+    drawBurstFlash(flash) {
+        if (flash.alpha <= 0) return;
+
+        this.ctx.save();
+        this.ctx.globalAlpha = flash.alpha * 0.3;
+
+        const gradient = this.ctx.createRadialGradient(flash.x, flash.y, 0, flash.x, flash.y, flash.radius);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        gradient.addColorStop(0.1, 'rgba(255, 200, 100, 0.8)');
+        gradient.addColorStop(0.4, 'rgba(255, 150, 50, 0.3)');
+        gradient.addColorStop(1, 'rgba(255, 120, 20, 0)');
+
+        this.ctx.fillStyle = gradient;
+        this.ctx.beginPath();
+        this.ctx.arc(flash.x, flash.y, flash.radius, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.restore();
     }
 }
 
@@ -155,11 +227,11 @@ class FireworkRocket {
         this.targetY = targetY;
 
         // 初始向上的速度
-        this.vy = -15 - Math.random() * 5; // 向上，快速
-        this.vx = (Math.random() - 0.5) * 2; // 轻微左右偏移
+        this.vy = -15 - Math.random() * 5;
+        this.vx = (Math.random() - 0.5) * 2;
 
-        this.trail = []; // 尾迹
-        this.trailLength = 25; // 更长的尾迹
+        this.trail = [];
+        this.trailLength = 25;
         this.color = '#fff';
 
         // 加速效果（模拟火箭推进）
@@ -167,16 +239,16 @@ class FireworkRocket {
     }
 
     update() {
-        // 记录尾迹（增加透明度渐变）
+        // 记录尾迹
         this.trail.push({ x: this.x, y: this.y, alpha: 1, size: 2.5 });
         if (this.trail.length > this.trailLength) {
             this.trail.shift();
         }
 
-        // 更新尾迹透明度和大小（更柔和的渐变）
+        // 更新尾迹透明度和大小
         this.trail.forEach((point, index) => {
             const ratio = index / this.trail.length;
-            point.alpha = ratio * 0.6; // 更柔和的尾迹
+            point.alpha = ratio * 0.6;
             point.size = ratio * 2.5;
         });
 
@@ -187,7 +259,7 @@ class FireworkRocket {
         this.x += this.vx;
         this.y += this.vy;
 
-        // 空气阻力（逐渐减小横向速度）
+        // 空气阻力
         this.vx *= 0.99;
 
         // 检查是否到达目标高度或速度变为正数（开始下落）
@@ -195,12 +267,11 @@ class FireworkRocket {
     }
 
     draw(ctx) {
-        // 绘制尾迹（使用渐变颜色，从金黄色到白色）
+        // 绘制尾迹
         this.trail.forEach((point, index) => {
             ctx.save();
             ctx.globalAlpha = point.alpha;
 
-            // 尾迹颜色渐变：金黄色 -> 橙色
             const ratio = index / this.trail.length;
             if (ratio > 0.5) {
                 ctx.fillStyle = '#fff';
@@ -216,7 +287,7 @@ class FireworkRocket {
             ctx.restore();
         });
 
-        // 绘制火箭头部（最亮的核心）
+        // 绘制火箭头部
         ctx.save();
         ctx.fillStyle = '#fff';
         ctx.shadowBlur = 30;
@@ -235,73 +306,65 @@ class FireworkRocket {
 }
 
 /**
- * 爆炸粒子（菊花型）
+ * 星花（爆炸主粒子）- 使用参考代码的物理系统
  */
-class ExplosionParticle {
-    constructor(x, y, layer, color) {
+class Star {
+    constructor(x, y, angle, speedMult, color, layer) {
         this.x = x;
         this.y = y;
-        this.layer = layer; // 'inner', 'middle', 'outer'
         this.color = color;
+        this.layer = layer;
 
         // 根据层次设置属性
         if (layer === 'inner') {
-            this.size = 2;
-            this.speed = 15 + Math.random() * 8; // 更快，更猛烈
-            this.decay = 0.022 + Math.random() * 0.012;
-            this.gravity = 0.06; // 较小重力
+            this.size = 2.5;
+            this.speed = (15 + Math.random() * 8) * speedMult;
+            this.life = 1200;
+            this.heavy = false; // 普通粒子，空气阻力更大
         } else if (layer === 'middle') {
             this.size = 3;
-            this.speed = 9 + Math.random() * 5;
-            this.decay = 0.015 + Math.random() * 0.01;
-            this.gravity = 0.1;
+            this.speed = (9 + Math.random() * 5) * speedMult;
+            this.life = 1500;
+            this.heavy = false;
         } else {
-            this.size = 4;
-            this.speed = 5 + Math.random() * 4;
-            this.decay = 0.01 + Math.random() * 0.008;
-            this.gravity = 0.13;
+            this.size = 3.5;
+            this.speed = (5 + Math.random() * 4) * speedMult;
+            this.life = 1800;
+            this.heavy = true; // 外层粒子更重，空气阻力更小
         }
 
-        // 菊花型：均匀分布的角度
-        this.angle = Math.random() * Math.PI * 2;
-        this.vx = Math.cos(this.angle) * this.speed;
-        this.vy = Math.sin(this.angle) * this.speed;
+        // 计算速度向量
+        this.vx = Math.sin(angle) * this.speed;
+        this.vy = Math.cos(angle) * this.speed;
+
         this.alpha = 1;
+        this.prevX = x;
+        this.prevY = y;
+
+        // 空气阻力系数
+        this.airDrag = this.heavy ? 0.992 : 0.98;
+
+        // 重力
+        this.gravity = 0.15;
 
         // 闪烁效果
-        this.twinkle = Math.random() > 0.4; // 更多粒子闪烁
+        this.twinkle = Math.random() > 0.4;
         this.twinkleSpeed = 0.1 + Math.random() * 0.08;
         this.twinkleOffset = Math.random() * Math.PI * 2;
 
-        // 初始爆发速度
-        this.friction = 0.96; // 更强的空气阻力
-
-        // 颜色变化
-        this.hue = this.colorToHue(color);
-        this.colorShift = (Math.random() - 0.5) * 20; // 颜色偏移
+        // 火花发射（星花尾巴）
+        this.sparkFreq = this.heavy ? 60 : 40; // 毫秒
+        this.sparkTimer = Math.random() * this.sparkFreq;
+        this.sparkColor = color;
+        this.sparkSpeed = 0.5;
+        this.sparkLife = 500;
     }
 
-    colorToHue(color) {
-        // 简化的颜色转换（用于真实感）
-        const colorMap = {
-            '#ffffff': 0,
-            '#ff6b6b': 0,
-            '#ee5a24': 15,
-            '#ffd93d': 50,
-            '#ff9f43': 35,
-            '#a55eea': 280,
-            '#8854d0': 270,
-            '#26de81': 140,
-            '#20bf6b': 150,
-            '#fd79a8': 330,
-            '#e84393': 320,
-            '#ffeaa7': 48,
-            '#fdcb6e': 45
-        };
-        return colorMap[color] || 0;
-    }
+    update(firework) {
+        // 记录上一帧位置（用于绘制拖尾）
+        this.prevX = this.x;
+        this.prevY = this.y;
 
-    update() {
         // 更新位置
         this.x += this.vx;
         this.y += this.vy;
@@ -310,17 +373,34 @@ class ExplosionParticle {
         this.vy += this.gravity;
 
         // 应用空气阻力
-        this.vx *= this.friction;
-        this.vy *= this.friction;
+        this.vx *= this.airDrag;
+        this.vy *= this.airDrag;
 
-        // 淡出
-        this.alpha -= this.decay;
+        // 减少生命值
+        this.life -= 16; // 约60fps
 
-        // 闪烁效果（部分粒子）
+        // 计算透明度（基于生命值）
+        this.alpha = Math.max(0, this.life / 1800);
+
+        // 闪烁效果
         if (this.twinkle) {
             const twinkleValue = Math.sin(Date.now() * this.twinkleSpeed + this.twinkleOffset);
-            this.alpha += twinkleValue * 0.15; // 更明显的闪烁
-            this.alpha = Math.max(0, Math.min(1, this.alpha)); // 限制范围
+            this.alpha += twinkleValue * 0.15;
+            this.alpha = Math.max(0, Math.min(1, this.alpha));
+        }
+
+        // 发射火花（星花尾巴）
+        this.sparkTimer -= 16;
+        while (this.sparkTimer < 0) {
+            this.sparkTimer += this.sparkFreq;
+            firework.sparks.push(new Spark(
+                this.x,
+                this.y,
+                this.sparkColor,
+                Math.random() * Math.PI * 2,
+                this.sparkSpeed,
+                this.sparkLife
+            ));
         }
     }
 
@@ -329,30 +409,66 @@ class ExplosionParticle {
 
         ctx.save();
         ctx.globalAlpha = displayAlpha;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.size;
+        ctx.lineCap = 'round';
+
+        // 绘制拖尾（从上一帧位置到当前位置）
+        ctx.beginPath();
+        ctx.moveTo(this.prevX, this.prevY);
+        ctx.lineTo(this.x, this.y);
+        ctx.stroke();
+
+        // 发光效果
+        ctx.shadowBlur = this.layer === 'inner' ? 25 : 18;
+        ctx.shadowColor = this.color;
+
+        ctx.restore();
+    }
+}
+
+/**
+ * 火花（小粒子）- 星花发射的火花
+ */
+class Spark {
+    constructor(x, y, color, angle, speed, life) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.life = life;
+        this.maxLife = life;
+
+        // 速度
+        this.vx = Math.sin(angle) * speed;
+        this.vy = Math.cos(angle) * speed;
+
+        this.alpha = 1;
+        this.airDrag = 0.9;
+        this.gravity = 0.1;
+        this.size = 1;
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += this.gravity;
+        this.vx *= this.airDrag;
+        this.vy *= this.airDrag;
+        this.life -= 16;
+        this.alpha = Math.max(0, this.life / this.maxLife);
+    }
+
+    draw(ctx) {
+        if (this.alpha <= 0) return;
+
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
         ctx.fillStyle = this.color;
-
-        // 不同层次不同的发光效果（增强）
-        if (this.layer === 'inner') {
-            ctx.shadowBlur = 30; // 内层最亮
-        } else if (this.layer === 'middle') {
-            ctx.shadowBlur = 22;
-        } else {
-            ctx.shadowBlur = 15;
-        }
-
+        ctx.shadowBlur = 8;
         ctx.shadowColor = this.color;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
-
-        // 添加额外的闪烁光晕
-        if (this.twinkle && displayAlpha > 0.5) {
-            ctx.globalAlpha = displayAlpha * 0.3;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size * 1.5, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
         ctx.restore();
     }
 }
