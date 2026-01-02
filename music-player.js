@@ -69,48 +69,66 @@ const MusicPlayer = {
      * 绑定事件
      */
     bindEvents() {
-        // ✨ 监听音乐启动提示的点击事件
+        // ✨ 监听开始按钮的点击事件
+        const button = document.getElementById('start-button');
         const prompt = document.getElementById('music-prompt');
-        if (!prompt) {
-            console.warn('⚠️ 未找到音乐启动提示元素');
+        const canvas = document.getElementById('firework-canvas');
+
+        if (!button || !prompt || !canvas) {
+            console.warn('⚠️ 未找到必要的元素');
             return;
         }
 
-        const startMusic = async () => {
+        // 初始化烟花爆炸效果
+        const firework = new FireworkExplosion(canvas);
+
+        const handleStart = async (event) => {
             if (this.state.userInteracted) return;
             this.state.userInteracted = true;
 
-            console.log('✅ 用户点击，开始播放音乐');
+            console.log('✅ 用户点击，开始播放音乐并放烟花');
 
-            // 隐藏提示
-            prompt.classList.add('hidden');
+            // 获取点击位置
+            const rect = button.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
 
-            // 播放音乐
-            if (this.state.audioElement) {
-                try {
-                    await this.state.audioElement.play();
-                    this.state.isPlaying = true;
-                    console.log('✅ 音乐播放成功');
-                } catch (e) {
-                    console.warn('⚠️ 音乐播放失败:', e.message);
+            // 触发烟花爆炸
+            firework.burst(x, y);
+
+            // 延迟一点时间播放音乐，让烟花先炸开
+            setTimeout(async () => {
+                // 播放音乐
+                if (this.state.audioElement) {
+                    try {
+                        await this.state.audioElement.play();
+                        this.state.isPlaying = true;
+                        console.log('✅ 音乐播放成功');
+                    } catch (e) {
+                        console.warn('⚠️ 音乐播放失败:', e.message);
+                    }
                 }
-            }
+
+                // 延迟隐藏提示，让用户看到烟花效果
+                setTimeout(() => {
+                    prompt.classList.add('hidden');
+                }, 1500);
+            }, 300);
         };
 
-        // 点击提示或按任意键开始
-        prompt.addEventListener('click', startMusic);
-        prompt.addEventListener('touchstart', startMusic);
+        // 点击按钮开始
+        button.addEventListener('click', handleStart);
 
         // 也支持按空格键开始
         const handleKeyPress = (e) => {
             if (e.code === 'Space' && !this.state.userInteracted) {
                 e.preventDefault();
-                startMusic();
+                handleStart(e);
             }
         };
         document.addEventListener('keydown', handleKeyPress);
 
-        console.log('⏳ 等待用户点击提示开始播放音乐...');
+        console.log('⏳ 等待用户点击按钮开始播放音乐...');
     },
 
     /**

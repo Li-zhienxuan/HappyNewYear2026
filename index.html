@@ -22,6 +22,8 @@
     <script src="flip-clock-canvas.js?v=2026"></script>
     <!-- 烟花效果 -->
     <script src="fireworks.js?v=2026"></script>
+    <!-- 烟花爆炸效果 -->
+    <script src="firework-explosion.js?v=2026"></script>
     <!-- 高级音乐播放器 -->
     <script src="music-player.js?v=2026"></script>
     <script>
@@ -37,9 +39,13 @@
 <body>
     <!-- 音乐启动提示 -->
     <div id="music-prompt" class="music-prompt">
+        <canvas id="firework-canvas" class="firework-canvas"></canvas>
         <div class="prompt-content">
-            <div class="prompt-icon">🎵</div>
-            <p class="prompt-text">点击任意位置开始播放音乐</p>
+            <button id="start-button" class="start-button">
+                <span class="button-text">点击开始</span>
+                <span class="button-icon">🎆</span>
+            </button>
+            <p class="prompt-text">开启音乐与烟花之旅</p>
         </div>
     </div>
 
