@@ -26,7 +26,8 @@ const NetEaseMusic = {
         isPlaying: false,
         method: null, // 'auto' | 'iframe' | 'fallback'
         audioElement: null,
-        iframeElement: null
+        iframeElement: null,
+        userInteracted: false  // ✨ 标记用户是否已交互
     },
 
     /**
@@ -101,7 +102,7 @@ const NetEaseMusic = {
     },
 
     /**
-     * 方案1：尝试自动播放（外链）
+     * 方案1：尝试自动播放（外链）- 增强版
      */
     tryAutoPlay() {
         console.log('🎵 方案1：尝试自动播放...');
@@ -111,22 +112,59 @@ const NetEaseMusic = {
         audio.loop = true;
         audio.volume = 0.5;
 
-        // 尝试自动播放
-        const playPromise = audio.play();
+        // ✨ 增强策略：监听用户首次交互后重试播放
+        const handleFirstInteraction = () => {
+            if (this.state.userInteracted) return; // 避免重复处理
 
-        if (playPromise !== undefined) {
-            playPromise
+            this.state.userInteracted = true;
+            console.log('👆 检测到用户交互，重试自动播放...');
+
+            // 移除事件监听
+            document.removeEventListener('click', handleFirstInteraction);
+            document.removeEventListener('touchstart', handleFirstInteraction);
+            document.removeEventListener('keydown', handleFirstInteraction);
+
+            // 重新尝试播放
+            audio.play()
                 .then(() => {
-                    console.log('✅ 方案1成功：自动播放生效');
+                    console.log('✅ 用户交互后播放成功');
                     this.state.method = 'auto';
                     this.state.isPlaying = true;
                     this.state.audioElement = audio;
                     this.updateUI();
                 })
                 .catch((error) => {
-                    console.warn('⚠️ 方案1失败：', error.message);
-                    console.log('🎵 尝试方案2：iframe嵌入...');
+                    console.warn('⚠️ 用户交互后仍失败:', error.message);
                     this.tryIframe();
+                });
+        };
+
+        // ✨ 注册用户交互监听器
+        document.addEventListener('click', handleFirstInteraction, { once: true });
+        document.addEventListener('touchstart', handleFirstInteraction, { once: true });
+        document.addEventListener('keydown', handleFirstInteraction, { once: true });
+
+        // 尝试立即自动播放
+        const playPromise = audio.play();
+
+        if (playPromise !== undefined) {
+            playPromise
+                .then(() => {
+                    console.log('✅ 方案1成功：自动播放立即生效');
+                    this.state.method = 'auto';
+                    this.state.isPlaying = true;
+                    this.state.audioElement = audio;
+                    this.updateUI();
+
+                    // ✨ 成功播放后移除交互监听器
+                    document.removeEventListener('click', handleFirstInteraction);
+                    document.removeEventListener('touchstart', handleFirstInteraction);
+                    document.removeEventListener('keydown', handleFirstInteraction);
+                })
+                .catch((error) => {
+                    console.warn('⚠️ 方案1失败，等待用户交互:', error.message);
+                    // ✨ 不立即尝试iframe，而是等待用户交互
+                    console.log('⏳ 等待用户点击/触摸页面后自动播放...');
                 });
         }
 

@@ -57,7 +57,18 @@ function updateCountdown() {
     const difference = TARGET_DATE - now;
 
     if (difference <= 0) {
-        isNewYear = true;
+        // 🎉 检测到跨年时刻！
+        if (!isNewYear) {
+            console.log('🎊 2026年到来了！');
+            isNewYear = true;
+
+            // 切换到跨年音乐
+            if (typeof NetEaseMusic !== 'undefined') {
+                console.log('🎵 切换到跨年庆祝音乐...');
+                NetEaseMusic.switchToCelebration();
+            }
+        }
+
         updateForwardTimer();
         return;
     }
@@ -164,6 +175,14 @@ function init() {
         const fireworks = new Fireworks();
         fireworks.start();
         console.log('🎊 祝福语效果已启动');
+    }
+
+    // ✨ 初始化网易云音乐模块
+    if (typeof NetEaseMusic !== 'undefined') {
+        NetEaseMusic.init();
+        console.log('🎵 网易云音乐模块已初始化');
+    } else {
+        console.warn('⚠️ NetEaseMusic模块未加载，音乐功能不可用');
     }
 
     // 初始更新
