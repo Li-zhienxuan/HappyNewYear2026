@@ -117,12 +117,11 @@ class FlipClock {
      * 清除画布
      */
     clearCanvas() {
-        this.ctx.clearRect(
-            -100,
-            -this.options.height / 2 - 50,
-            this.options.width + 200,
-            this.options.height + 100
-        );
+        // ✨ 完全清除整个画布区域
+        this.ctx.save();
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0); // 重置变换矩阵
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.restore();
     }
 
     /**
@@ -219,6 +218,9 @@ class FlipClock {
             return;
         }
 
+        // ✨ 在开始新动画前，先完全清除画布
+        this.clearCanvas();
+
         this.isFlipping = true;
         this.nextValue = newValue;
         this.flipStartTime = performance.now();
@@ -245,6 +247,7 @@ class FlipClock {
             return;
         }
 
+        // ✨ 每帧开始时完全清除画布
         this.clearCanvas();
 
         // 计算翻转角度（-90度 到 90度）
