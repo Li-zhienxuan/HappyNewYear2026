@@ -63,9 +63,9 @@ function updateCountdown() {
             isNewYear = true;
 
             // 切换到跨年音乐
-            if (typeof NetEaseMusic !== 'undefined') {
+            if (typeof MusicPlayer !== 'undefined') {
                 console.log('🎵 切换到跨年庆祝音乐...');
-                NetEaseMusic.switchToCelebration();
+                MusicPlayer.switchToCelebration();
             }
         }
 
@@ -177,12 +177,12 @@ function init() {
         console.log('🎊 祝福语效果已启动');
     }
 
-    // ✨ 初始化网易云音乐模块
-    if (typeof NetEaseMusic !== 'undefined') {
-        NetEaseMusic.init();
-        console.log('🎵 网易云音乐模块已初始化');
+    // ✨ 初始化高级音乐播放器
+    if (typeof MusicPlayer !== 'undefined') {
+        MusicPlayer.init();
+        console.log('🎵 高级音乐播放器已初始化');
     } else {
-        console.warn('⚠️ NetEaseMusic模块未加载，音乐功能不可用');
+        console.warn('⚠️ MusicPlayer模块未加载，音乐功能不可用');
     }
 
     // 初始更新
