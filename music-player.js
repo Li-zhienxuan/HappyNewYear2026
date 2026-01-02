@@ -21,28 +21,10 @@ const MusicPlayer = {
         },
         {
             id: 2,
-            title: 'Above the Time',
+            title: 'Eight (_prod._SUGA)',
             artist: 'IU (아이유)',
-            url: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
-            lyrics: `Above the Time - IU
-
-[Instrumental]
-
-✨ 梦幻般的旋律
-🎹 如时间般流逝的美妙
-🌟 穿越时空的感动
-
-IU 的音乐总是能
-带给人心底的温暖
-如同跨越时光的祝福`,
-            cover: '💜'
-        },
-        {
-            id: 3,
-            title: 'Eight',
-            artist: 'IU (아이유)',
-            url: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_5b3825a16c.mp3',
-            lyrics: `Eight - IU
+            url: 'https://music.163.com/song/media/outer/url?id=1458789991.mp3',
+            lyrics: `Eight (prod. SUGA) - IU
 
 ✨ 28岁的夜晚
 🌙 在梦境与现实之间
@@ -53,17 +35,21 @@ Can you see me?
 飞翔的梦
 永远不会终结
 
+You and me
+Eight (8)
+在这特别的夜晚
+
 愿这首歌
 带给你
 无尽的力量`,
-            cover: '🎨'
+            cover: '💜'
         },
         {
-            id: 4,
-            title: 'Through the Night',
+            id: 3,
+            title: '밤편지 (Through the Night)',
             artist: 'IU (아이유)',
-            url: 'https://cdn.pixabay.com/download/audio/2022/01/26/audio_0b5a0747a9.mp3',
-            lyrics: `Through the Night - IU (밤편지)
+            url: 'https://music.163.com/song/media/outer/url?id=440977232.mp3',
+            lyrics: `밤편지 (Through the Night) - IU
 
 [Verse]
 夜深了，想对你说的话
@@ -83,33 +69,31 @@ IU 的声音
             cover: '🌙'
         },
         {
-            id: 5,
-            title: 'Love wins all',
+            id: 4,
+            title: 'Love poem',
             artist: 'IU (아이유)',
-            url: 'https://cdn.pixabay.com/download/audio/2024/01/15/audio_9c6e8b4f67.mp3',
-            lyrics: `Love wins all - IU
+            url: 'https://music.163.com/song/media/outer/url?id=1387531257.mp3',
+            lyrics: `Love poem - IU
 
-🎬 电影《Dream》主题曲
-💜 爱战胜一切
+💜 给你的诗
+🎹 旋律流淌在心间
 
-[Verse]
-在混乱的世界里
-唯有爱是不灭的光
+💌 每一句歌词
+都是爱的告白
+✨ 每一个音符
+都承载着思念
 
-✨ 跨越所有障碍
-🌟 永不放弃的希望
-
-愿爱
-永远胜利
-愿你我
-都能找到归宿`,
-            cover: '🎬'
+Love poem
+写给最特别的你
+愿这份爱
+永远传递`,
+            cover: '💌'
         },
         {
-            id: 6,
+            id: 5,
             title: 'Blueming',
             artist: 'IU (아이유)',
-            url: 'https://cdn.pixabay.com/download/audio/2023/11/20/audio_a5b2c3d4e5.mp3',
+            url: 'https://music.163.com/song/media/outer/url?id=1387531287.mp3',
             lyrics: `Blueming - IU
 
 🌸 绽放的蓝色
@@ -118,6 +102,10 @@ IU 的声音
 ✨ 像花朵一样盛开
 🎨 如画卷般美丽
 
+You make me bloom
+你让我绽放
+在你的季节里
+
 IU 的音乐花园
 每一首都值得珍藏
 愿这份美好
@@ -125,7 +113,50 @@ IU 的音乐花园
             cover: '🌸'
         },
         {
+            id: 6,
+            title: 'Celebrity',
+            artist: 'IU (아이유)',
+            url: 'https://music.163.com/song/media/outer/url?id=186016.mp3',
+            lyrics: `Celebrity - IU
+
+✨ 我是 Celebrity
+🌟 在这个平凡的世界里
+💜 我也可以闪耀
+
+🎬 你是我的导演
+我是你的主角
+一起创造
+最美好的故事
+
+IU 的自信
+传递给你
+愿你也成为
+自己的 Celebrity`,
+            cover: '⭐'
+        },
+        {
             id: 7,
+            title: 'Coin',
+            artist: 'IU (아이유)',
+            url: 'https://music.163.com/song/media/outer/url?id=186017.mp3',
+            lyrics: `Coin - IU
+
+💫 就像投硬币
+正面反面都是你
+✨ 每一面都精彩
+
+🎲 运气与努力
+缺一不可
+💜 你是最棒的
+
+Coin coin
+转动命运
+愿好运
+永远伴随你`,
+            cover: '🪙'
+        },
+        {
+            id: 8,
             title: '新年快乐',
             artist: '喜庆祝福',
             url: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3',
@@ -150,35 +181,6 @@ IU 的音乐花园
 Happy New Year!
 新年快乐！`,
             cover: '🎆'
-        },
-        {
-            id: 8,
-            title: '春江花月夜',
-            artist: '中国传统名曲',
-            url: 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_106f9f8e41.mp3',
-            lyrics: `春江花月夜
-中国传统名曲
-
-[纯音乐]
-
-春江潮水连海平
-海上明月共潮生
-滟滟随波千万里
-何处春江无月明
-
-🎵 古典雅致
-🎶 韵味悠长
-🎹 感受东方美学
-
-[意境]
-江流宛转绕芳甸
-月照花林皆似霰
-空里流霜不觉飞
-汀上白沙看不见
-
-中国风之美
-尽在不言中`,
-            cover: '🌙'
         }
     ],
 
