@@ -69,77 +69,70 @@ const MusicPlayer = {
      * 绑定事件
      */
     bindEvents() {
-        // ✨ 自动触发播放，无需用户交互
-        const autoPlay = async () => {
-            if (this.state.userInteracted || !this.state.audioElement) return;
+        // ✨ 使用 iframe 嵌入 audio 元素来绕过自动播放限制
+        const autoPlayViaIframe = () => {
+            if (this.state.userInteracted) return;
             this.state.userInteracted = true;
 
-            console.log('🤖 尝试自动播放音乐...');
+            console.log('🤖 使用 iframe 方法尝试自动播放...');
 
-            // 方法1：直接播放
             try {
-                await this.state.audioElement.play();
-                this.state.isPlaying = true;
-                console.log('✅ 自动播放成功！');
+                // 创建一个隐藏的 iframe
+                const iframe = document.createElement('iframe');
+                iframe.style.cssText = `
+                    position: fixed;
+                    top: -9999px;
+                    left: -9999px;
+                    width: 1px;
+                    height: 1px;
+                    border: none;
+                `;
+                iframe.allow = 'autoplay';
+
+                // 在 iframe 中创建 audio 元素
+                const audioHtml = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head></head>
+                    <body>
+                        <audio id="bgm" loop autoplay style="display:none">
+                            <source src="${this.playlist[0].url}" type="audio/mpeg">
+                        </audio>
+                        <script>
+                            const audio = document.getElementById('bgm');
+                            audio.volume = 0.3;
+                            audio.play().catch(e => console.log('Iframe play failed:', e));
+                            window.parent.postMessage({type: 'audio-ready'}, '*');
+                        <\/script>
+                    </body>
+                    </html>
+                `;
+
+                document.body.appendChild(iframe);
+                iframe.srcdoc = audioHtml;
+
+                // 监听 iframe 消息
+                const messageHandler = (event) => {
+                    if (event.data && event.data.type === 'audio-ready') {
+                        console.log('✅ iframe 音频已加载');
+                        this.state.isPlaying = true;
+                        window.removeEventListener('message', messageHandler);
+                    }
+                };
+                window.addEventListener('message', messageHandler);
+
+                console.log('✅ iframe 已创建，等待音频播放...');
                 return;
             } catch (e) {
-                console.log('⚠️ 直接播放失败，尝试模拟交互...');
-            }
-
-            // 方法2：模拟点击 body
-            try {
-                document.body.click();
-                await new Promise(r => setTimeout(r, 100));
-                await this.state.audioElement.play();
-                this.state.isPlaying = true;
-                console.log('✅ 模拟点击成功！');
-                return;
-            } catch (e) {
-                console.log('⚠️ 模拟点击失败，尝试创建交互元素...');
-            }
-
-            // 方法3：创建并点击临时按钮
-            try {
-                const btn = document.createElement('button');
-                btn.style.cssText = 'position:fixed;top:-999px;left:-999px;';
-                document.body.appendChild(btn);
-                btn.click();
-                await new Promise(r => setTimeout(r, 100));
-                await this.state.audioElement.play();
-                this.state.isPlaying = true;
-                console.log('✅ 通过临时按钮触发成功！');
-                btn.remove();
-                return;
-            } catch (e) {
-                console.log('⚠️ 临时按钮方法失败，尝试键盘事件...');
-            }
-
-            // 方法4：触发键盘事件
-            try {
-                const keyEvent = new KeyboardEvent('keydown', {
-                    key: 'Enter',
-                    code: 'Enter',
-                    keyCode: 13,
-                    bubbles: true,
-                    cancelable: true
-                });
-                document.dispatchEvent(keyEvent);
-                await new Promise(r => setTimeout(r, 100));
-                await this.state.audioElement.play();
-                this.state.isPlaying = true;
-                console.log('✅ 键盘事件触发成功！');
-                return;
-            } catch (e) {
-                console.warn('❌ 所有可能的自动播放方法都已尝试，需要真实用户交互');
+                console.warn('⚠️ iframe 方法失败:', e.message);
             }
         };
 
         // 页面加载完成后立即尝试
         if (document.readyState === 'loading') {
-            window.addEventListener('DOMContentLoaded', autoPlay, { once: true });
+            window.addEventListener('DOMContentLoaded', autoPlayViaIframe, { once: true });
         } else {
-            // 延迟一小段时间确保音频已加载
-            setTimeout(autoPlay, 500);
+            setTimeout(autoPlayViaIframe, 100);
         }
     },
 
