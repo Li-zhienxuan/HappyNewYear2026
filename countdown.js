@@ -19,7 +19,7 @@ const elements = {
 // 上一次的值
 let previousValues = {
     minutes: -1,
-    seconds: -1,
+    seconds: '-1', // ✨ 使用字符串格式以匹配比较逻辑
     milliseconds: -1
 };
 
@@ -86,10 +86,11 @@ function updateCountdown() {
             previousValues.minutes = minutes;
         }
 
-        // 秒：只在值改变时翻页
-        if (seconds !== previousValues.seconds) {
+        // 秒：只在值改变时翻页（格式化为两位数）
+        const paddedSeconds = seconds.toString().padStart(2, '0');
+        if (paddedSeconds !== previousValues.seconds) {
             clocks.seconds.update(seconds);
-            previousValues.seconds = seconds;
+            previousValues.seconds = paddedSeconds;
         }
 
         // 毫秒：快速变化，不翻页（直接更新）
@@ -119,10 +120,11 @@ function updateForwardTimer() {
             previousValues.minutes = minutes;
         }
 
-        // 秒：只在值改变时翻页
-        if (seconds !== previousValues.seconds) {
+        // 秒：只在值改变时翻页（格式化为两位数）
+        const paddedSeconds = seconds.toString().padStart(2, '0');
+        if (paddedSeconds !== previousValues.seconds) {
             clocks.seconds.update(seconds);
-            previousValues.seconds = seconds;
+            previousValues.seconds = paddedSeconds;
         }
 
         // 毫秒：快速变化，不翻页（直接更新）

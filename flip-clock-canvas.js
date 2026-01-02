@@ -19,7 +19,7 @@ class FlipClock {
             fontSize: 700,
             fontFamily: 'Arial Rounded MT Bold, Arial, sans-serif',
             textColor: '#ffffff',
-            animationDuration: 600,
+            animationDuration: 400, // ✨ 加快动画速度，更流畅
             ...options
         };
 
@@ -236,6 +236,7 @@ class FlipClock {
 
         if (elapsed >= duration) {
             this.isFlipping = false;
+            this.currentValue = this.nextValue; // ✨ 更新当前值
             this.renderStatic(this.nextValue);
 
             if (this.flipCallback) {
